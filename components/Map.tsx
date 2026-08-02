@@ -1,7 +1,6 @@
 "use client";
 
-import OrionMap from "@/components/OrionMap";
-
+import OrionMap from "@/components/map/OrionMap";
 
 
 interface MapProps {
@@ -14,8 +13,6 @@ interface MapProps {
 
 
 
-
-
 export default function Map({
 
   operacao,
@@ -23,7 +20,6 @@ export default function Map({
   jogador
 
 }:MapProps){
-
 
 
   return (
@@ -37,5 +33,6 @@ export default function Map({
     />
 
   );
+
 
 }

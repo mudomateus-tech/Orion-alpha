@@ -10,9 +10,10 @@ import {
   onSnapshot
 } from "firebase/firestore";
 
-import {
-  db
-} from "@/lib/firebase";
+import { db } from "@/lib/firebase";
+
+import type { Jogador } from "@/types/Player";
+
 
 
 export function usePlayer(
@@ -23,68 +24,244 @@ export function usePlayer(
 
 ){
 
-  const [jogador,setJogador] = useState<any>(null);
+
+
+  const [
+
+    jogador,
+
+    setJogador
+
+  ] = useState<Jogador | null>(null);
+
+
+
+
+  const [
+
+    carregando,
+
+    setCarregando
+
+  ] = useState(true);
+
+
+
+
+  const [
+
+    erro,
+
+    setErro
+
+  ] = useState("");
+
+
+
+
+
+
 
 
   useEffect(()=>{
 
+
+
     if(
+
       !operacaoId ||
+
       !jogadorId
+
     ){
+
+      setCarregando(false);
+
       return;
+
     }
 
 
-    const referencia = doc(
-
-      db,
-
-      "operacoes",
-
-      operacaoId
-
-    );
 
 
-    const cancelar = onSnapshot(
-
-      referencia,
-
-      (snapshot)=>{
-
-        if(snapshot.exists()){
 
 
-          const dados:any = snapshot.data();
+
+    const referencia =
+
+      doc(
+
+        db,
+
+        "operacoes",
+
+        operacaoId
+
+      );
+
+
+
+
+
+
+
+    const cancelar =
+
+      onSnapshot(
+
+
+
+        referencia,
+
+
+
+        (snapshot)=>{
+
+
+
+
+
+          if(
+
+            !snapshot.exists()
+
+          ){
+
+            setErro(
+
+              "Operação não encontrada."
+
+            );
+
+
+            setCarregando(false);
+
+
+            return;
+
+          }
+
+
+
+
+
+
+
+
+          const dados:any =
+
+            snapshot.data();
+
+
+
+
+
+
 
 
           const encontrado =
 
             dados.jogadores?.find(
 
-              (j:any)=>
+
+
+              (j:Jogador)=>
 
                 j.id === jogadorId
+
+
 
             );
 
 
-          setJogador(
 
-            encontrado || null
+
+
+
+
+
+          if(
+
+            encontrado
+
+          ){
+
+
+
+            setJogador(
+
+              encontrado
+
+            );
+
+
+            setErro("");
+
+
+
+          }
+
+          else{
+
+
+
+            setErro(
+
+              "Jogador não encontrado."
+
+            );
+
+
+          }
+
+
+
+
+
+
+
+
+          setCarregando(false);
+
+
+
+
+        },
+
+
+
+        ()=>{
+
+
+
+          setErro(
+
+            "Erro ao carregar jogador."
 
           );
 
 
+
+          setCarregando(false);
+
+
+
         }
 
-      }
 
-    );
+
+      );
+
+
+
+
+
 
 
     return ()=>cancelar();
+
+
+
 
 
   },[
@@ -96,10 +273,26 @@ export function usePlayer(
   ]);
 
 
+
+
+
+
+
   return {
 
-    jogador
+
+    jogador,
+
+
+    carregando,
+
+
+    erro
+
+
 
   };
+
+
 
 }

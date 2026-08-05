@@ -3,6 +3,7 @@ import { Mission } from "./Mission";
 import { Sabotage } from "./Sabotage";
 import { Meeting } from "./Meeting";
 
+
 export interface Operation {
 
   id: string;
@@ -36,3 +37,11 @@ export interface Operation {
   };
 
 }
+
+
+/**
+ * Compatibilidade ORION
+ * Alguns arquivos usam Operation,
+ * outros usam Operacao.
+ */
+export type Operacao = Operation;

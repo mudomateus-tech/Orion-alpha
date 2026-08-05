@@ -6,20 +6,37 @@ import {
 } from "react";
 
 
-export default function CodeTask({
-
-  concluir
-
-}:{
+interface CodeTaskProps {
 
   concluir:()=>void;
 
-}){
+  senha?: string | number[];
+
+}
+
+
+export default function CodeTask({
+
+  concluir,
+
+  senha
+
+}:CodeTaskProps){
 
 
   function gerarSequencia(){
 
+    if(senha){
+
+      return String(senha)
+        .split("")
+        .slice(0,4);
+
+    }
+
+
     const numeros:string[] = [];
+
 
     for(let i = 0; i < 4; i++){
 
@@ -39,9 +56,12 @@ export default function CodeTask({
 
     }
 
+
     return numeros;
 
   }
+
+
 
 
 
@@ -73,6 +93,8 @@ export default function CodeTask({
 
 
 
+
+
   useEffect(()=>{
 
     const tempo = setTimeout(()=>{
@@ -81,7 +103,9 @@ export default function CodeTask({
 
     },3000);
 
+
     return ()=>clearTimeout(tempo);
+
 
   },[]);
 
@@ -89,7 +113,10 @@ export default function CodeTask({
 
 
 
+
+
   function apertar(numero:string){
+
 
     if(mostrar){
 
@@ -115,6 +142,8 @@ export default function CodeTask({
 
 
 
+
+
     if(
 
       novaSequencia[posicao] !==
@@ -122,6 +151,7 @@ export default function CodeTask({
       sequenciaCorreta[posicao]
 
     ){
+
 
       setMensagem(
 
@@ -133,15 +163,23 @@ export default function CodeTask({
 
       setTimeout(()=>{
 
+
         setDigitado([]);
 
         setMensagem("");
 
+
       },1000);
+
+
 
       return;
 
+
     }
+
+
+
 
 
 
@@ -153,6 +191,8 @@ export default function CodeTask({
 
 
 
+
+
     if(
 
       novaSequencia.length ===
@@ -160,6 +200,7 @@ export default function CodeTask({
       sequenciaCorreta.length
 
     ){
+
 
       setMensagem(
 
@@ -171,13 +212,19 @@ export default function CodeTask({
 
       setTimeout(()=>{
 
+
         concluir();
+
 
       },800);
 
+
     }
 
+
   }
+
+
 
 
 
@@ -199,7 +246,9 @@ export default function CodeTask({
 
 
 
+
   return(
+
 
     <div className="
       bg-zinc-900
@@ -221,11 +270,14 @@ export default function CodeTask({
 
 
 
+
       <p className="mb-4">
 
         Memorize a sequência.
 
       </p>
+
+
 
 
 
@@ -238,6 +290,7 @@ export default function CodeTask({
         tracking-widest
         mb-5
       ">
+
 
         {
 
@@ -253,7 +306,11 @@ export default function CodeTask({
 
         }
 
+
       </div>
+
+
+
 
 
 
@@ -273,7 +330,11 @@ export default function CodeTask({
 
         }
 
+
       </p>
+
+
+
 
 
 
@@ -286,6 +347,7 @@ export default function CodeTask({
         tracking-widest
         mb-5
       ">
+
 
         {
 
@@ -301,7 +363,12 @@ export default function CodeTask({
 
         }
 
+
       </div>
+
+
+
+
 
 
 
@@ -311,9 +378,11 @@ export default function CodeTask({
         gap-3
       ">
 
+
         {
 
           numeros.map((numero)=>(
+
 
             <button
 
@@ -337,13 +406,19 @@ export default function CodeTask({
 
               {numero}
 
+
             </button>
+
 
           ))
 
         }
 
+
       </div>
+
+
+
 
 
 
@@ -351,20 +426,27 @@ export default function CodeTask({
 
         mensagem &&
 
+
         <p className="
           mt-5
           text-yellow-400
         ">
 
+
           {mensagem}
 
+
         </p>
+
 
       }
 
 
+
     </div>
 
+
   );
+
 
 }

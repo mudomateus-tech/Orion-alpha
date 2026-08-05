@@ -8,6 +8,8 @@ import {
   db
 } from "@/lib/firebase";
 
+import type { Jogador } from "@/types/Player";
+
 
 
 export async function buscarJogador(
@@ -16,7 +18,7 @@ export async function buscarJogador(
 
   jogadorId:string
 
-){
+): Promise<Jogador | null>{
 
 
   const referencia = doc(
@@ -59,7 +61,7 @@ export async function buscarJogador(
 
     dados.jogadores?.find(
 
-      (j:any)=>
+      (j:Jogador)=>
 
         j.id === jogadorId
 
@@ -81,7 +83,7 @@ export async function atualizarJogador(
 
   jogadorId:string,
 
-  dadosAtualizados:any
+  dadosAtualizados:Partial<Jogador>
 
 ){
 
@@ -132,7 +134,7 @@ export async function atualizarJogador(
 
     jogadores.map(
 
-      (j:any)=>{
+      (j:Jogador)=>{
 
 
         if(j.id === jogadorId){

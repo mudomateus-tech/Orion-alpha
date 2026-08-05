@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  useSearchParams
-} from "next/navigation";
-
-import {
+  Suspense,
   useEffect,
   useState
 } from "react";
+
+import {
+  useSearchParams
+} from "next/navigation";
 
 import {
   useOperation
@@ -22,9 +23,7 @@ import {
 } from "@/hooks/useLocationTracker";
 
 import Header from "@/components/ui/Header";
-
 import Card from "@/components/ui/Card";
-
 import Button from "@/components/ui/Button";
 
 import OrionMap from "@/components/map/OrionMap";
@@ -55,42 +54,54 @@ import {
 
 
 
-export default function Jogo(){
+
+function JogoContent(){
 
 
   const params = useSearchParams();
 
 
-  const operacaoId =
-    params.get("id");
 
+  const operacaoId = params.get("id");
 
-  const jogadorId =
-    params.get("jogador");
+  const jogadorId = params.get("jogador");
+
 
 
 
   const {
     operacao
   } = useOperation(
+
     operacaoId
+
   );
+
 
 
 
   const {
     jogador
   } = usePlayer(
+
     operacaoId,
+
     jogadorId
+
   );
+
 
 
 
   useLocationTracker(
+
     operacaoId,
+
     jogadorId
+
   );
+
+
 
 
 
@@ -109,11 +120,12 @@ export default function Jogo(){
 
 
 
+
   const jogadorMorto =
 
-    jogador?.status === "morto" ||
+    jogador?.status === "morto";
 
-    jogador?.vivo === false;
+
 
 
 
@@ -151,7 +163,9 @@ export default function Jogo(){
     }
 
 
+
     iniciar();
+
 
 
   },[
@@ -168,29 +182,18 @@ export default function Jogo(){
 
 
 
-  async function abrirMissao(
-
-    missao:any
-
-  ){
+  async function abrirMissao(missao:any){
 
 
     if(jogadorMorto){
 
-
       setMensagem(
-
         "Você está eliminado."
-
       );
-
 
       return;
 
-
     }
-
-
 
 
 
@@ -203,50 +206,33 @@ export default function Jogo(){
 
     ){
 
-
       setMensagem(
-
         "Localização indisponível."
-
       );
 
-
       return;
-
 
     }
 
 
 
 
+    const distancia = calcularDistancia(
 
+      jogador.localizacao.latitude,
 
+      jogador.localizacao.longitude,
 
-    const distancia =
+      missao.localizacao.latitude,
 
-      calcularDistancia(
+      missao.localizacao.longitude
 
-        jogador.localizacao.latitude,
-
-        jogador.localizacao.longitude,
-
-        missao.localizacao.latitude,
-
-        missao.localizacao.longitude
-
-      );
+    );
 
 
 
 
-
-
-
-    if(
-
-      distancia > 1
-
-    ){
+    if(distancia > 1){
 
 
       setMensagem(
@@ -263,15 +249,7 @@ export default function Jogo(){
 
 
 
-
-
-
-
-    setTarefaAtual(
-
-      missao
-
-    );
+    setTarefaAtual(missao);
 
 
   }
@@ -285,50 +263,25 @@ export default function Jogo(){
   async function concluirTarefa(){
 
 
-    try{
+    await concluirMissao(
+
+      operacaoId!,
+
+      jogadorId!,
+
+      tarefaAtual.id
+
+    );
 
 
-      await concluirMissao(
+    setMensagem(
 
-        operacaoId!,
+      "✅ Missão concluída!"
 
-        jogadorId!,
-
-        tarefaAtual.id
-
-      );
+    );
 
 
-
-      setMensagem(
-
-        "✅ Missão concluída!"
-
-      );
-
-
-
-      setTarefaAtual(
-
-        null
-
-      );
-
-
-    }
-
-
-    catch(error:any){
-
-
-      setMensagem(
-
-        error.message
-
-      );
-
-
-    }
+    setTarefaAtual(null);
 
 
   }
@@ -339,37 +292,16 @@ export default function Jogo(){
 
 
 
-
   async function sabotar(){
 
 
-    if(jogadorMorto){
+    const resultado = await executarSabotagem(
 
+      operacaoId!,
 
-      setMensagem(
+      jogadorId!
 
-        "Você está eliminado."
-
-      );
-
-
-      return;
-
-
-    }
-
-
-
-    const resultado =
-
-      await executarSabotagem(
-
-        operacaoId!,
-
-        jogadorId!
-
-      );
-
+    );
 
 
     setMensagem(
@@ -408,10 +340,7 @@ export default function Jogo(){
 
 
 
-
-
   return (
-
 
     <main className="min-h-screen bg-black text-white p-6">
 
@@ -457,27 +386,19 @@ export default function Jogo(){
 
 
 
-
-
-
       {
 
         tarefaAtual &&
 
-        (
+        <TaskEngine
 
-          <TaskEngine
+          missao={tarefaAtual}
 
-            missao={tarefaAtual}
+          concluir={concluirTarefa}
 
-            concluir={concluirTarefa}
-
-          />
-
-        )
+        />
 
       }
-
 
 
 
@@ -490,66 +411,94 @@ export default function Jogo(){
 
         !tarefaAtual &&
 
-        (
 
-          <Card title="MISSÕES">
-
-
-            {
-
-              operacao?.missoes?.map(
-
-                (missao:any)=>(
+        <Card title="MISSÕES">
 
 
-                  <div
+          {
 
-                    key={missao.id}
+            operacao?.missoes?.map(
 
-                    className="bg-zinc-800 p-4 rounded-xl mb-3"
+              (missao:any)=>(
+
+                <div
+
+                  key={missao.id}
+
+                  className="bg-zinc-800 p-4 rounded-xl mb-3"
+
+                >
+
+                  <h2>
+
+                    🎯 {missao.titulo}
+
+                  </h2>
+
+
+                  <p>
+
+                    {missao.descricao}
+
+                  </p>
+
+
+                  <Button
+
+                    onClick={()=>abrirMissao(missao)}
 
                   >
 
+                    EXECUTAR
 
-                    <h2>
-
-                      🎯 {missao.titulo}
-
-                    </h2>
+                  </Button>
 
 
-                    <p>
+                </div>
 
-                      {missao.descricao}
-
-                    </p>
-
-
-
-                    <Button
-
-                      onClick={()=>abrirMissao(missao)}
-
-                    >
-
-                      EXECUTAR
-
-                    </Button>
-
-
-                  </div>
-
-
-                )
 
               )
 
-            }
+            )
+
+          }
 
 
-          </Card>
+        </Card>
 
-        )
+
+      }
+
+
+
+
+
+
+      {
+
+        jogador.papel === "infiltrado" &&
+
+        !jogadorMorto &&
+
+
+        <Card title="SABOTAGEM">
+
+
+          <Button
+
+            variant="danger"
+
+            onClick={sabotar}
+
+          >
+
+            SABOTAR SISTEMA
+
+          </Button>
+
+
+        </Card>
+
 
       }
 
@@ -565,58 +514,19 @@ export default function Jogo(){
 
         !jogadorMorto &&
 
-        (
 
-          <Card title="SABOTAGEM">
+        <EliminationButton
 
+          operacaoId={operacaoId}
 
-            <Button
+          jogadorId={jogadorId}
 
-              variant="danger"
+          jogadores={operacao?.jogadores}
 
-              onClick={sabotar}
+        />
 
-            >
-
-              SABOTAR SISTEMA
-
-            </Button>
-
-
-          </Card>
-
-        )
 
       }
-
-
-
-
-
-
-
-      {
-
-        jogador.papel === "infiltrado" &&
-
-        !jogadorMorto &&
-
-        (
-
-          <EliminationButton
-
-            operacaoId={operacaoId}
-
-            jogadorId={jogadorId}
-
-            jogadores={operacao?.jogadores}
-
-          />
-
-        )
-
-      }
-
 
 
 
@@ -627,22 +537,51 @@ export default function Jogo(){
 
         mensagem &&
 
-        (
+        <p className="text-yellow-400 text-center mt-4">
 
-          <p className="text-yellow-400 text-center mt-4">
+          {mensagem}
 
-            {mensagem}
+        </p>
 
-          </p>
-
-        )
 
       }
 
 
-
     </main>
 
+  );
+
+
+}
+
+
+
+
+
+
+
+export default function Jogo(){
+
+
+  return (
+
+    <Suspense
+
+      fallback={
+
+        <main className="min-h-screen bg-black text-white flex items-center justify-center">
+
+          Carregando jogo...
+
+        </main>
+
+      }
+
+    >
+
+      <JogoContent/>
+
+    </Suspense>
 
   );
 

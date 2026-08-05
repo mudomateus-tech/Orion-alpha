@@ -18,19 +18,35 @@ import {
 
 export function useRealtimePlayers(
 
-  operacaoId:string | null
+  operacaoId:string|null
 
 ){
 
 
-  const [jogadores,setJogadores]=useState<any[]>([]);
+
+  const [
+
+    jogadores,
+
+    setJogadores
+
+  ] = useState<any[]>([]);
+
+
+
+
 
 
 
   useEffect(()=>{
 
 
-    if(!operacaoId){
+
+    if(
+
+      !operacaoId
+
+    ){
 
       return;
 
@@ -38,52 +54,90 @@ export function useRealtimePlayers(
 
 
 
-    const referencia = doc(
-
-      db,
-
-      "operacoes",
-
-      operacaoId
-
-    );
 
 
+    const referencia =
 
-    const cancelar = onSnapshot(
+      doc(
 
-      referencia,
+        db,
 
-      (snapshot)=>{
+        "operacoes",
 
+        operacaoId
 
-        if(snapshot.exists()){
-
-
-          const dados:any=snapshot.data();
+      );
 
 
-          setJogadores(
 
-            dados.jogadores || []
 
-          );
+
+
+
+    const cancelar =
+
+      onSnapshot(
+
+        referencia,
+
+        (snapshot)=>{
+
+
+
+          if(
+
+            snapshot.exists()
+
+          ){
+
+
+
+            const dados:any =
+
+              snapshot.data();
+
+
+
+
+            setJogadores(
+
+              dados.jogadores || []
+
+            );
+
+
+          }
 
 
         }
 
-
-      }
-
-    );
+      );
 
 
 
-    return ()=>cancelar();
 
 
 
-  },[operacaoId]);
+
+    return ()=>{
+
+
+      cancelar();
+
+
+    };
+
+
+
+  },[
+
+    operacaoId
+
+  ]);
+
+
+
+
 
 
 

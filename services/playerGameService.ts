@@ -6,7 +6,7 @@ import {
 
 import { db } from "@/lib/firebase";
 
-import type { Jogador } from "@/types/player";
+import type { Jogador } from "@/types/Player";
 
 
 
@@ -16,7 +16,8 @@ export async function buscarJogador(
 
   jogadorId:string
 
-){
+): Promise<Jogador>{
+
 
   const referencia =
 
@@ -35,17 +36,19 @@ export async function buscarJogador(
   const resultado =
 
     await getDoc(
+
       referencia
+
     );
 
 
 
-  if(
-    !resultado.exists()
-  ){
+  if(!resultado.exists()){
 
     throw new Error(
+
       "Operação não encontrada"
+
     );
 
   }
@@ -70,12 +73,12 @@ export async function buscarJogador(
 
 
 
-  if(
-    !jogador
-  ){
+  if(!jogador){
 
     throw new Error(
+
       "Jogador não encontrado"
+
     );
 
   }
@@ -84,10 +87,7 @@ export async function buscarJogador(
 
   return jogador;
 
-
 }
-
-
 
 
 
@@ -116,33 +116,33 @@ export async function buscarPapelJogador(
 
   return {
 
-
     id:
+
       jogador.id,
 
 
     nome:
+
       jogador.nome,
 
 
     papel:
+
       jogador.papel,
 
 
     tipo:
+
       jogador.tipo,
 
 
     status:
-      jogador.status
 
+      jogador.status
 
   };
 
-
 }
-
-
 
 
 
@@ -176,17 +176,19 @@ export async function atualizarJogador(
   const resultado =
 
     await getDoc(
+
       referencia
+
     );
 
 
 
-  if(
-    !resultado.exists()
-  ){
+  if(!resultado.exists()){
 
     throw new Error(
+
       "Operação não encontrada"
+
     );
 
   }
@@ -201,7 +203,7 @@ export async function atualizarJogador(
 
   const jogadores =
 
-    operacao.jogadores.map(
+    (operacao.jogadores || []).map(
 
       (j:Jogador)=>
 
@@ -237,10 +239,7 @@ export async function atualizarJogador(
 
   );
 
-
 }
-
-
 
 
 
@@ -269,10 +268,7 @@ export async function jogadorConectado(
 
   );
 
-
 }
-
-
 
 
 
@@ -300,6 +296,5 @@ export async function jogadorDesconectado(
     }
 
   );
-
 
 }

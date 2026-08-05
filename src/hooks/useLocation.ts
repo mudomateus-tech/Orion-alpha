@@ -11,39 +11,26 @@ import {
 } from "@/services/locationService";
 
 
-
 export function useLocation(
 
-  operacaoId?:string | null,
+  operacaoId?: string | null,
 
-  jogadorId?:string | null
+  jogadorId?: string | null
 
 ){
 
 
-
   const [
-
     localizacao,
-
     setLocalizacao
-
   ] = useState<any>(null);
 
 
 
-
-
   const [
-
     erro,
-
     setErro
-
   ] = useState("");
-
-
-
 
 
 
@@ -52,13 +39,9 @@ export function useLocation(
   useEffect(()=>{
 
 
-
     if(
-
       !operacaoId ||
-
       !jogadorId
-
     ){
 
       return;
@@ -66,6 +49,9 @@ export function useLocation(
     }
 
 
+    const idOperacao: string = operacaoId;
+
+    const idJogador: string = jogadorId;
 
 
 
@@ -76,9 +62,7 @@ export function useLocation(
 
 
 
-
     async function atualizar(){
-
 
 
       try{
@@ -91,14 +75,11 @@ export function useLocation(
 
 
 
-
         if(!ativo){
 
           return;
 
         }
-
-
 
 
 
@@ -113,18 +94,15 @@ export function useLocation(
 
 
 
-
-
         await atualizarLocalizacaoJogador(
 
-          operacaoId,
+          idOperacao,
 
-          jogadorId,
+          idJogador,
 
           posicao
 
         );
-
 
 
 
@@ -151,11 +129,7 @@ export function useLocation(
 
 
 
-
-
     atualizar();
-
-
 
 
 
@@ -170,7 +144,6 @@ export function useLocation(
         10000
 
       );
-
 
 
 
@@ -194,6 +167,8 @@ export function useLocation(
 
 
 
+
+
   },[
 
     operacaoId,
@@ -207,8 +182,6 @@ export function useLocation(
 
 
 
-
-
   return {
 
 
@@ -216,7 +189,6 @@ export function useLocation(
 
 
     erro
-
 
 
   };

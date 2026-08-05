@@ -14,11 +14,16 @@ import {
   db
 } from "@/lib/firebase";
 
+import type {
+  Operacao
+} from "@/types/Operation";
+
+
 
 
 export function useOperation(
 
-  operacaoId:string | null
+  operacaoId: string | null
 
 ){
 
@@ -29,7 +34,31 @@ export function useOperation(
 
     setOperacao
 
-  ] = useState<any>(null);
+  ] = useState<Operacao | null>(null);
+
+
+
+
+  const [
+
+    carregando,
+
+    setCarregando
+
+  ] = useState(true);
+
+
+
+
+  const [
+
+    erro,
+
+    setErro
+
+  ] = useState("");
+
+
 
 
 
@@ -39,9 +68,16 @@ export function useOperation(
 
     if(!operacaoId){
 
+
+      setCarregando(false);
+
       return;
 
+
     }
+
+
+
 
 
 
@@ -58,6 +94,8 @@ export function useOperation(
 
 
 
+
+
     const cancelar = onSnapshot(
 
       referencia,
@@ -68,29 +106,27 @@ export function useOperation(
         if(snapshot.exists()){
 
 
-          const dados = {
+          setOperacao({
 
-            id:snapshot.id,
+            id: snapshot.id,
 
             ...snapshot.data()
 
-          };
+          } as Operacao);
 
 
 
-          console.log(
-
-            "OPERAÇÃO ATUALIZADA:",
-
-            dados
-
-          );
+          setErro("");
 
 
+        }
 
-          setOperacao(
+        else{
 
-            dados
+
+          setErro(
+
+            "Operação não encontrada."
 
           );
 
@@ -98,18 +134,26 @@ export function useOperation(
         }
 
 
+
+
+        setCarregando(false);
+
+
+
       },
 
-      (erro)=>{
+      ()=>{
 
 
-        console.error(
+        setErro(
 
-          "ERRO FIREBASE:",
-
-          erro
+          "Erro ao sincronizar operação."
 
         );
+
+
+        setCarregando(false);
+
 
 
       }
@@ -120,15 +164,15 @@ export function useOperation(
 
 
 
+
+
     return ()=>cancelar();
 
 
 
-  },[
 
-    operacaoId
+  },[operacaoId]);
 
-  ]);
 
 
 
@@ -138,9 +182,9 @@ export function useOperation(
 
     operacao,
 
-    carregando:false,
+    carregando,
 
-    erro:null
+    erro
 
   };
 

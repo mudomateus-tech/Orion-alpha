@@ -2,14 +2,17 @@
 
 import { useEffect } from "react";
 
-import { atualizarLocalizacao } from "@/services/locationService";
+import {
+  atualizarLocalizacao
+} from "@/services/locationService";
+
 
 
 export function useLocationTracker(
 
-  operacaoId:string | null,
+  operacaoId: string | null,
 
-  jogadorId:string | null
+  jogadorId: string | null
 
 ){
 
@@ -17,17 +20,29 @@ export function useLocationTracker(
   useEffect(()=>{
 
 
-    if(!operacaoId || !jogadorId){
+    if(
+      !operacaoId ||
+      !jogadorId
+    ){
 
       return;
 
     }
 
 
+    const idOperacao: string = operacaoId;
+
+    const idJogador: string = jogadorId;
+
+
+
+
 
     if(!navigator.geolocation){
 
-      console.log("GPS não disponível");
+      console.log(
+        "GPS não disponível"
+      );
 
       return;
 
@@ -50,11 +65,12 @@ export function useLocationTracker(
 
         direcaoAtual = event.alpha;
 
-
       }
 
 
     }
+
+
 
 
 
@@ -76,7 +92,7 @@ export function useLocationTracker(
 
     async function atualizar(
 
-      position:GeolocationPosition
+      position: GeolocationPosition
 
     ){
 
@@ -86,9 +102,9 @@ export function useLocationTracker(
 
         await atualizarLocalizacao(
 
-          operacaoId,
+          idOperacao,
 
-          jogadorId,
+          idJogador,
 
           position.coords.latitude,
 
@@ -117,7 +133,6 @@ export function useLocationTracker(
 
       }
 
-
       catch(error){
 
 
@@ -141,9 +156,10 @@ export function useLocationTracker(
 
 
 
+
     function erro(
 
-      error:GeolocationPositionError
+      error: GeolocationPositionError
 
     ){
 
@@ -158,7 +174,6 @@ export function useLocationTracker(
 
 
     }
-
 
 
 
@@ -183,8 +198,6 @@ export function useLocationTracker(
       }
 
     );
-
-
 
 
 
@@ -229,6 +242,7 @@ export function useLocationTracker(
       );
 
 
+
       window.removeEventListener(
 
         "deviceorientation",
@@ -243,7 +257,6 @@ export function useLocationTracker(
 
 
 
-
   },[
 
     operacaoId,
@@ -251,5 +264,7 @@ export function useLocationTracker(
     jogadorId
 
   ]);
+
+
 
 }

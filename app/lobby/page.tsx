@@ -1,6 +1,12 @@
 "use client";
 
 import {
+  Suspense,
+  useEffect,
+  useState
+} from "react";
+
+import {
   useSearchParams,
   useRouter
 } from "next/navigation";
@@ -26,14 +32,10 @@ import {
   atualizarLocalizacaoJogador
 } from "@/services/locationService";
 
-import {
-  useEffect,
-  useState
-} from "react";
 
 
 
-export default function Lobby(){
+function LobbyContent(){
 
 
   const params = useSearchParams();
@@ -42,16 +44,12 @@ export default function Lobby(){
 
 
 
-  const operacaoId =
-    params.get("id");
+  const operacaoId = params.get("id");
 
+  const codigo = params.get("codigo");
 
-  const codigo =
-    params.get("codigo");
+  const jogadorParametro = params.get("jogador");
 
-
-  const jogadorParametro =
-    params.get("jogador");
 
 
 
@@ -60,8 +58,11 @@ export default function Lobby(){
     carregando,
     erro
   } = useOperation(
+
     operacaoId
+
   );
+
 
 
 
@@ -73,16 +74,11 @@ export default function Lobby(){
 
 
   const [
-    localizacao,
-    setLocalizacao
-  ] = useState<any>(null);
-
-
-
-  const [
     mensagem,
     setMensagem
   ] = useState("");
+
+
 
 
 
@@ -103,21 +99,28 @@ export default function Lobby(){
 
     if(id){
 
+
       setJogadorId(id);
 
 
+
       sessionStorage.setItem(
+
         "agenteId",
+
         id
+
       );
+
 
     }
 
 
   },[
-    jogadorParametro
-  ]);
 
+    jogadorParametro
+
+  ]);
 
 
 
@@ -137,13 +140,14 @@ export default function Lobby(){
 
         !operacao ||
 
-        operacao.jogadores?.[0]?.id !== jogadorId
+        !operacaoId
 
       ){
 
         return;
 
       }
+
 
 
 
@@ -156,15 +160,10 @@ export default function Lobby(){
 
 
 
-        setLocalizacao(
-          posicao
-        );
-
-
 
         await atualizarLocalizacaoJogador(
 
-          operacaoId!,
+          operacaoId,
 
           jogadorId,
 
@@ -173,15 +172,18 @@ export default function Lobby(){
         );
 
 
-      }
 
+      }
 
       catch(error:any){
 
 
         console.log(
+
           "GPS:",
+
           error.message
+
         );
 
 
@@ -189,6 +191,7 @@ export default function Lobby(){
 
 
     }
+
 
 
 
@@ -205,8 +208,6 @@ export default function Lobby(){
     operacaoId
 
   ]);
-
-
 
 
 
@@ -253,8 +254,6 @@ export default function Lobby(){
     router
 
   ]);
-
-
 
 
 
@@ -314,11 +313,6 @@ export default function Lobby(){
     catch(error:any){
 
 
-      console.error(
-        error
-      );
-
-
       setMensagem(
 
         error.message ||
@@ -339,25 +333,19 @@ export default function Lobby(){
 
 
 
-
-
   if(carregando){
 
 
     return (
 
-      <main
-
-        className="
+      <main className="
         min-h-screen
         bg-black
         text-white
         flex
         items-center
         justify-center
-        "
-
-      >
+      ">
 
         Carregando operação...
 
@@ -374,20 +362,14 @@ export default function Lobby(){
 
 
 
-
-
   return (
 
-    <main
-
-      className="
+    <main className="
       min-h-screen
       bg-black
       text-white
       p-6
-      "
-
-    >
+    ">
 
 
 
@@ -403,30 +385,19 @@ export default function Lobby(){
 
 
 
-
-
       <Card
 
         title="CÓDIGO DA OPERAÇÃO"
 
-        className="
-        max-w-md
-        mx-auto
-        text-center
-        "
+        className="max-w-md mx-auto text-center"
 
       >
 
-
-        <h1
-
-          className="
+        <h1 className="
           text-5xl
           font-black
           tracking-widest
-          "
-
-        >
+        ">
 
           {codigo}
 
@@ -440,32 +411,24 @@ export default function Lobby(){
 
 
 
-
-
-
       <Card
 
         title="AGENTES CONECTADOS"
 
         className="
-        max-w-md
-        mx-auto
-        mt-6
+          max-w-md
+          mx-auto
+          mt-6
         "
 
       >
 
 
-
-        <div
-
-          className="
+        <div className="
           flex
           flex-col
           gap-3
-          "
-
-        >
+        ">
 
 
           {
@@ -474,7 +437,6 @@ export default function Lobby(){
 
               (jogador:any)=>(
 
-
                 <PlayerCard
 
                   key={jogador.id}
@@ -482,7 +444,6 @@ export default function Lobby(){
                   jogador={jogador}
 
                 />
-
 
               )
 
@@ -494,9 +455,7 @@ export default function Lobby(){
         </div>
 
 
-
       </Card>
-
 
 
 
@@ -510,22 +469,16 @@ export default function Lobby(){
         operacao?.jogadores?.[0]?.id === jogadorId &&
 
 
-        <div
-
-          className="
+        <div className="
           max-w-md
           mx-auto
           mt-6
-          "
-
-        >
+        ">
 
 
           <Button
 
-            className="
-            w-full
-            "
+            className="w-full"
 
             onClick={iniciar}
 
@@ -533,9 +486,7 @@ export default function Lobby(){
 
             INICIAR OPERAÇÃO
 
-
           </Button>
-
 
 
         </div>
@@ -549,30 +500,21 @@ export default function Lobby(){
 
 
 
-
-
       {
 
         mensagem &&
 
-
-        <p
-
-          className="
+        <p className="
           text-yellow-400
           text-center
           mt-5
-          "
-
-        >
+        ">
 
           {mensagem}
 
         </p>
 
-
       }
-
 
 
 
@@ -584,27 +526,62 @@ export default function Lobby(){
 
         erro &&
 
-
-        <p
-
-          className="
+        <p className="
           text-red-500
           text-center
           mt-5
-          "
-
-        >
+        ">
 
           {erro}
 
         </p>
-
 
       }
 
 
 
     </main>
+
+  );
+
+
+}
+
+
+
+
+
+
+
+export default function Lobby(){
+
+
+  return (
+
+    <Suspense
+
+      fallback={
+
+        <main className="
+          min-h-screen
+          bg-black
+          text-white
+          flex
+          items-center
+          justify-center
+        ">
+
+          Carregando lobby...
+
+        </main>
+
+      }
+
+    >
+
+      <LobbyContent/>
+
+    </Suspense>
 
   );
 

@@ -1,23 +1,17 @@
 "use client";
 
+import type { Jogador } from "@/types/Player";
+
 interface PlayerCardProps {
-
-  jogador:any;
-
+  jogador: Jogador;
 }
 
-
 export default function PlayerCard({
-
   jogador
-
-}:PlayerCardProps){
-
+}: PlayerCardProps) {
 
   return (
-
     <div
-
       className="
         bg-zinc-800
         border
@@ -28,64 +22,39 @@ export default function PlayerCard({
         items-center
         justify-between
       "
-
     >
-
 
       <div>
 
-
         <h3
-
           className="
             text-white
             font-bold
             text-lg
           "
-
         >
-
           {jogador.nome}
-
         </h3>
 
 
-
         <p
-
           className="
             text-zinc-400
             text-sm
           "
-
         >
-
           {jogador.tipo === "comandante"
-
-            ?
-
-            "👑 Comandante"
-
-            :
-
-            "🛰️ Agente"
-
+            ? "👑 Comandante"
+            : "🛰️ Agente"
           }
-
         </p>
-
 
       </div>
 
 
-
-
-
       <div>
 
-
         <span
-
           className={`
             px-3
             py-1
@@ -95,46 +64,19 @@ export default function PlayerCard({
 
             ${
               jogador.conectado
-
-              ?
-
-              "bg-green-600 text-white"
-
-              :
-
-              "bg-red-600 text-white"
-
+                ? "bg-green-600 text-white"
+                : "bg-red-600 text-white"
             }
-
           `}
-
         >
-
-          {
-
-            jogador.conectado
-
-            ?
-
-            "ONLINE"
-
-            :
-
-            "OFFLINE"
-
+          {jogador.conectado
+            ? "ONLINE"
+            : "OFFLINE"
           }
-
-
         </span>
-
 
       </div>
 
-
-
     </div>
-
   );
-
-
 }

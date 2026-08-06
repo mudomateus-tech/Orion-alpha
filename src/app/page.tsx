@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import OrionHUD from "@/components/orion/OrionHUD";
+import OrionHomeHUD from "@/components/orion/OrionHomeHUD";
 import OrionTitle from "@/components/orion/OrionTitle";
 import OrionPanel from "@/components/orion/OrionPanel";
 import OrionButton from "@/components/orion/OrionButton";
@@ -34,7 +34,7 @@ export default function Home(){
 
 
 
-      <OrionHUD />
+      <OrionHomeHUD />
 
 
 
@@ -54,6 +54,7 @@ export default function Home(){
         <OrionRadar />
 
       </div>
+
 
 
 
@@ -138,11 +139,8 @@ export default function Home(){
 
 
 
-            <Link
 
-              href="/criar"
-
-            >
+            <Link href="/criar">
 
               <OrionButton>
 
@@ -150,7 +148,6 @@ export default function Home(){
 
               </OrionButton>
 
-
             </Link>
 
 
@@ -159,47 +156,32 @@ export default function Home(){
 
 
 
-            <Link
+            <Link href="/entrar">
 
-              href="/entrar"
-
-            >
-
-              <OrionButton
-
-                secondary
-
-              >
+              <OrionButton secondary>
 
                 ENTRAR EM OPERAÇÃO
 
               </OrionButton>
 
-
             </Link>
 
 
 
 
 
-            <Link
 
-              href="/perfil"
 
-            >
+            <Link href="/perfil">
 
-              <OrionButton
-
-                secondary
-
-              >
+              <OrionButton secondary>
 
                 PERFIL DO AGENTE
 
               </OrionButton>
 
-
             </Link>
+
 
 
 
@@ -234,15 +216,15 @@ export default function Home(){
 
 
 
+
       </div>
+
 
 
 
 
     </main>
 
-
   );
-
 
 }

@@ -4,13 +4,13 @@ import {
   updateDoc
 } from "firebase/firestore";
 
-import { db } from "@/lib/firebase";
+import {
+  db
+} from "@/lib/firebase";
 
 import {
   criarEvento
 } from "@/services/eventService";
-
-
 
 
 
@@ -19,8 +19,6 @@ export async function verificarVitoria(
   operacaoId:string
 
 ){
-
-
 
   const referencia =
 
@@ -36,8 +34,6 @@ export async function verificarVitoria(
 
 
 
-
-
   const snapshot =
 
     await getDoc(
@@ -45,8 +41,6 @@ export async function verificarVitoria(
       referencia
 
     );
-
-
 
 
 
@@ -66,15 +60,9 @@ export async function verificarVitoria(
 
 
 
-
-
-
   const dados:any =
 
     snapshot.data();
-
-
-
 
 
 
@@ -90,28 +78,15 @@ export async function verificarVitoria(
 
 
 
-
-
-
-
   const missoes =
 
     dados.missoes || [];
 
 
 
-
-
-
   const jogadores =
 
     dados.jogadores || [];
-
-
-
-
-
-
 
 
 
@@ -129,25 +104,25 @@ export async function verificarVitoria(
 
 
 
-
-
-
-
-
   const agentes =
 
     jogadores.filter(
 
       (j:any)=>
 
-        j.papel === "agente" ||
+        (
 
-        j.papel === "hacker"
+          j.papel === "agente" ||
+
+          j.papel === "hacker"
+
+        )
+
+        &&
+
+        j.status !== "morto"
 
     );
-
-
-
 
 
 
@@ -159,24 +134,21 @@ export async function verificarVitoria(
 
         j.papel === "infiltrado"
 
+        &&
+
+        j.status !== "morto"
+
     );
 
 
 
+  let vencedor:string|null =
+
+    null;
 
 
-
-
-
-
-  let vencedor = null;
 
   let mensagem = "";
-
-
-
-
-
 
 
 
@@ -186,7 +158,10 @@ export async function verificarVitoria(
 
   ){
 
-    vencedor = "agentes";
+    vencedor =
+
+      "agentes";
+
 
 
     mensagem =
@@ -194,34 +169,25 @@ export async function verificarVitoria(
       "Os agentes completaram todas as missões.";
 
   }
+    if(
 
-
-
-
-
-
-
-
-  if(
+    !vencedor &&
 
     infiltrados.length >= agentes.length
 
   ){
 
-    vencedor = "infiltrados";
+    vencedor =
+
+      "infiltrados";
+
 
 
     mensagem =
 
-      "O infiltrado dominou a operação.";
+      "Os infiltrados dominaram a operação.";
 
   }
-
-
-
-
-
-
 
 
 
@@ -231,14 +197,11 @@ export async function verificarVitoria(
 
   ){
 
-
-
     await updateDoc(
 
       referencia,
 
       {
-
 
         status:
 
@@ -248,30 +211,19 @@ export async function verificarVitoria(
 
         vitoria:{
 
-
           vencedor,
 
-
           mensagem,
-
 
           data:
 
             Date.now()
 
-
         }
-
-
 
       }
 
     );
-
-
-
-
-
 
 
 
@@ -280,7 +232,6 @@ export async function verificarVitoria(
       operacaoId,
 
       {
-
 
         tipo:
 
@@ -294,7 +245,6 @@ export async function verificarVitoria(
 
 
 
-
         descricao:
 
           mensagem,
@@ -305,24 +255,12 @@ export async function verificarVitoria(
 
           "sistema"
 
-
-
       }
 
     );
 
-
-
-
   }
-
-
-
-
-
-
-
-  return {
+    return {
 
     vencedor,
 

@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+
+:root {
+
+  --background: #000000;
+
+  --foreground: #ededed;
+
+}
+
+
+
+@theme inline {
+
+  --color-background: var(--background);
+
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-geist-sans);
+
+  --font-mono: var(--font-geist-mono);
+
+}
+
+
+
+@media (prefers-color-scheme: dark) {
+
+  :root {
+
+    --background: #000000;
+
+    --foreground: #ededed;
+
+  }
+
+}
+
+
+
+body {
+
+  background: var(--background);
+
+  color: var(--foreground);
+
+  font-family: Arial, Helvetica, sans-serif;
+
+}
+
+
+
+/* ========================= */
+/*        ORION SYSTEM       */
+/*     HOLOGRAM EFFECTS      */
+/* ========================= */
+
+
+
+@keyframes scan {
+
+  0% {
+
+    transform: translateY(-100%);
+
+  }
+
+
+  100% {
+
+    transform: translateY(100vh);
+
+  }
+
+}
+
+
+
+@keyframes pulse-orion {
+
+  0% {
+
+    box-shadow:
+
+      0 0 5px #00ffff,
+
+      0 0 10px #00ffff;
+
+  }
+
+
+  50% {
+
+    box-shadow:
+
+      0 0 20px #00ffff,
+
+      0 0 40px #00ffff;
+
+  }
+
+
+  100% {
+
+    box-shadow:
+
+      0 0 5px #00ffff,
+
+      0 0 10px #00ffff;
+
+  }
+
+}
+
+
+
+@keyframes danger-pulse {
+
+  0% {
+
+    box-shadow:
+
+      0 0 5px red;
+
+  }
+
+
+  50% {
+
+    box-shadow:
+
+      0 0 30px red;
+
+  }
+
+
+  100% {
+
+    box-shadow:
+
+      0 0 5px red;
+
+  }
+
+}
+
+
+
+@theme {
+
+  --animate-scan:
+
+    scan 3s linear infinite;
+
+
+  --animate-orion-pulse:
+
+    pulse-orion 2s infinite;
+
+
+  --animate-danger-pulse:
+
+    danger-pulse 1.5s infinite;
+
+}

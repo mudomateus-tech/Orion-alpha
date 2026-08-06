@@ -12,6 +12,10 @@ import {
   criarEvento
 } from "@/services/eventService";
 
+import {
+  verificarVitoria
+} from "@/services/victoryService";
+
 
 
 
@@ -114,7 +118,6 @@ export async function eliminarJogador(
 
 
 
-
   if(atacante.status === "morto"){
 
     throw new Error(
@@ -124,8 +127,6 @@ export async function eliminarJogador(
     );
 
   }
-
-
 
 
 
@@ -159,8 +160,6 @@ export async function eliminarJogador(
 
 
 
-
-
   if(alvo.status === "morto"){
 
     throw new Error(
@@ -170,8 +169,6 @@ export async function eliminarJogador(
     );
 
   }
-
-
 
 
 
@@ -195,7 +192,6 @@ export async function eliminarJogador(
 
 
 
-
   if(
 
     alvo.papel === "hacker"
@@ -209,8 +205,6 @@ export async function eliminarJogador(
     );
 
   }
-
-
 
 
 
@@ -239,7 +233,6 @@ export async function eliminarJogador(
 
           };
 
-
         }
 
 
@@ -249,9 +242,6 @@ export async function eliminarJogador(
       }
 
     );
-
-
-
 
 
 
@@ -298,20 +288,15 @@ export async function eliminarJogador(
 
 
 
-
-
-
   await criarEvento(
 
     operacaoId,
 
     {
 
-
       tipo:
 
         "jogador_eliminado",
-
 
 
       titulo:
@@ -319,12 +304,9 @@ export async function eliminarJogador(
         "💀 Agente eliminado",
 
 
-
-
       descricao:
 
         `${alvo.nome} foi eliminado da operação.`,
-
 
 
       jogadorId:
@@ -340,11 +322,98 @@ export async function eliminarJogador(
 
 
 
+  const resultadoVitoria =
+
+    await verificarVitoria(
+
+      operacaoId
+
+    );
+
+
+
+
+
+  if(resultadoVitoria?.finalizada){
+
+
+    await updateDoc(
+
+      referencia,
+
+      {
+
+        status:
+
+          "finalizada",
+
+
+        vencedor:
+
+          resultadoVitoria.vencedor,
+
+
+        finalizadaEm:
+
+          Date.now()
+
+      }
+
+    );
+
+
+
+
+
+    await criarEvento(
+
+      operacaoId,
+
+      {
+
+        tipo:
+
+          "vitoria",
+
+
+        titulo:
+
+          "🏆 Operação encerrada",
+
+
+        descricao:
+
+          resultadoVitoria.vencedor === "agentes"
+
+            ? "Os agentes venceram a operação."
+
+            : "Os infiltrados venceram a operação."
+
+
+      }
+
+    );
+
+
+  }
+
+
+
 
 
   return {
 
-    sucesso:true
+    sucesso:true,
+
+
+    finalizada:
+
+      resultadoVitoria?.finalizada ?? false,
+
+
+    vencedor:
+
+      resultadoVitoria?.vencedor ?? null
 
   };
 

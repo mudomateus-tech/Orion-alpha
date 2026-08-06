@@ -12,6 +12,10 @@ export type Tipo =
   | "comandante"
   | "agente";
 
+export type StatusJogador =
+  | "ativo"
+  | "morto"
+  | "fantasma";
 
 export interface Jogador {
 
@@ -27,13 +31,12 @@ export interface Jogador {
 
   entrouNaPartida: boolean;
 
-  status: "ativo" | "morto";
+  status: StatusJogador;
 
   vivo?: boolean;
 
   localizacao?: Localizacao;
 
 }
-
 
 export type Player = Jogador;

@@ -272,3 +272,116 @@ export async function atualizarMissao(
   return missoes;
 
 }
+export async function adicionarMissao(
+
+  operacaoId:string,
+
+  titulo:string,
+
+  descricao:string,
+
+  latitude:number,
+
+  longitude:number
+
+){
+
+  const referencia = doc(
+
+    db,
+
+    "operacoes",
+
+    operacaoId
+
+  );
+
+
+  const snapshot = await getDoc(
+
+    referencia
+
+  );
+
+
+  if(!snapshot.exists()){
+
+    throw new Error(
+
+      "Operação não encontrada."
+
+    );
+
+  }
+
+
+
+  const operacao:any =
+
+    snapshot.data();
+
+
+
+  const raio =
+
+    operacao.configuracao?.raioMissao ?? 5;
+
+
+
+  const novaMissao = {
+
+    id: crypto.randomUUID(),
+
+    titulo,
+
+    descricao,
+
+    status:"pendente",
+
+    progresso:0,
+
+    criadaEm:Date.now(),
+
+    raio,
+
+    localizacao:{
+
+      latitude,
+
+      longitude
+
+    }
+
+  };
+
+
+
+  const missoes =
+
+    operacao.missoes || [];
+
+
+
+  await updateDoc(
+
+    referencia,
+
+    {
+
+      missoes:[
+
+        ...missoes,
+
+        novaMissao
+
+      ]
+
+    }
+
+  );
+
+
+
+  return novaMissao;
+
+}

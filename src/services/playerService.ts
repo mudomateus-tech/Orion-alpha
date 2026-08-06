@@ -20,7 +20,6 @@ export async function buscarJogador(
 
 ): Promise<Jogador | null>{
 
-
   const referencia = doc(
 
     db,
@@ -31,15 +30,11 @@ export async function buscarJogador(
 
   );
 
-
-
   const snapshot = await getDoc(
 
     referencia
 
   );
-
-
 
   if(!snapshot.exists()){
 
@@ -51,11 +46,7 @@ export async function buscarJogador(
 
   }
 
-
-
   const dados:any = snapshot.data();
-
-
 
   const jogador =
 
@@ -66,8 +57,6 @@ export async function buscarJogador(
         j.id === jogadorId
 
     );
-
-
 
   return jogador || null;
 
@@ -87,7 +76,6 @@ export async function atualizarJogador(
 
 ){
 
-
   const referencia = doc(
 
     db,
@@ -98,15 +86,11 @@ export async function atualizarJogador(
 
   );
 
-
-
   const snapshot = await getDoc(
 
     referencia
 
   );
-
-
 
   if(!snapshot.exists()){
 
@@ -118,24 +102,17 @@ export async function atualizarJogador(
 
   }
 
-
-
   const dados:any = snapshot.data();
-
-
 
   const jogadores =
 
     dados.jogadores || [];
-
-
 
   const jogadoresAtualizados =
 
     jogadores.map(
 
       (j:Jogador)=>{
-
 
         if(j.id === jogadorId){
 
@@ -149,14 +126,11 @@ export async function atualizarJogador(
 
         }
 
-
         return j;
 
       }
 
     );
-
-
 
   await updateDoc(
 
@@ -172,6 +146,35 @@ export async function atualizarJogador(
 
   );
 
+  return true;
+
+}
+
+
+
+
+
+export async function ativarModoFantasma(
+
+  operacaoId:string,
+
+  jogadorId:string
+
+){
+
+  await atualizarJogador(
+
+    operacaoId,
+
+    jogadorId,
+
+    {
+
+      status:"fantasma"
+
+    }
+
+  );
 
   return true;
 

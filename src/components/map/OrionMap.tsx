@@ -12,6 +12,8 @@ interface OrionMapProps {
 
   jogador:any;
 
+  modoFantasma?:boolean;
+
 }
 
 
@@ -20,35 +22,31 @@ export default function OrionMap({
 
   operacao,
 
-  jogador
+  jogador,
+
+  modoFantasma = false
 
 }:OrionMapProps){
 
 
 
   if(
-
     !jogador ||
-
     !jogador.localizacao
-
   ){
 
     return (
 
-      <div
-
-        className="
+      <div className="
         bg-black
         border
-        border-green-500/30
+        border-cyan-400/30
         rounded-2xl
         p-10
         text-center
-        text-green-400
-        "
-
-      >
+        text-cyan-300
+        shadow-[0_0_30px_rgba(0,255,255,0.2)]
+      ">
 
         Aguardando sinal GPS...
 
@@ -60,148 +58,75 @@ export default function OrionMap({
 
 
 
-
-
-
   const jogadores =
-
     operacao?.jogadores || [];
 
 
-
   const missoes =
-
     operacao?.missoes || [];
-
-
-
-  const direcao =
-
-    jogador.localizacao.direcao ?? 0;
-
-
 
 
 
 
 
   function transformarRadar(
-
     distancia:number,
-
     angulo:number
-
   ){
 
-
-    const alcanceMaximo =
-
-      100;
-
-
-
     const raio =
-
       Math.min(
-
-        distancia /
-
-        alcanceMaximo *
-
-        45,
-
+        distancia / 100 * 45,
         45
-
       );
 
 
-
     const radiano =
-
       (angulo - 90)
-
       *
-
-      Math.PI /
-
+      Math.PI
+      /
       180;
-
 
 
     return {
 
       x:
-
         50 +
-
-        Math.cos(radiano)
-
-        *
-
+        Math.cos(radiano) *
         raio,
 
 
       y:
-
         50 +
-
-        Math.sin(radiano)
-
-        *
-
+        Math.sin(radiano) *
         raio
 
     };
 
-
   }
-
-
-
 
 
 
 
 
   function pontoAlvo(
-
     localizacao:any
-
   ){
-
-
-    const distancia =
-
-      calcularDistanciaGPS(
-
-        jogador.localizacao,
-
-        localizacao
-
-      );
-
-
-
-    const angulo =
-
-      calcularAngulo(
-
-        jogador.localizacao,
-
-        localizacao
-
-      );
-
-
 
     return transformarRadar(
 
-      distancia,
+      calcularDistanciaGPS(
+        jogador.localizacao,
+        localizacao
+      ),
 
-      angulo
+      calcularAngulo(
+        jogador.localizacao,
+        localizacao
+      )
 
     );
-
 
   }
 
@@ -209,218 +134,206 @@ export default function OrionMap({
 
 
 
+  function dadosJogador(j:any){
 
+    if(
+      j.papel === "infiltrado"
+    ){
 
+      return {
 
-  function iconeMissao(tipo:string){
+        cor:
+        "bg-red-500 shadow-[0_0_30px_rgba(255,0,0,1)]",
 
+        tag:
+        "INTRUSO"
 
-    switch(tipo){
-
-      case "cabos":
-
-        return "🔌";
-
-
-      case "frequencia":
-
-        return "📡";
-
-
-      case "codigo":
-
-        return "🧠";
-
-
-      case "sequencia":
-
-        return "📶";
-
-
-      case "reparo":
-
-        return "🔧";
-
-
-      default:
-
-        return "📍";
+      };
 
     }
 
 
+
+    if(
+      j.papel === "hacker"
+    ){
+
+      return {
+
+        cor:
+        "bg-purple-400 shadow-[0_0_30px_rgba(180,0,255,1)]",
+
+        tag:
+        "HACKER"
+
+      };
+
+    }
+
+
+
+    return {
+
+      cor:
+      "bg-cyan-400 shadow-[0_0_30px_rgba(0,255,255,1)]",
+
+      tag:
+      "AGENTE"
+
+    };
+
   }
-   return (
 
-    <div
 
-      className="
+
+
+
+  function iconeMissao(
+    tipo:string
+  ){
+
+    switch(tipo){
+
+      case "cabos":
+        return "🔌";
+
+      case "frequencia":
+        return "📡";
+
+      case "codigo":
+        return "🧠";
+
+      case "sequencia":
+        return "📶";
+
+      case "reparo":
+        return "🔧";
+
+      default:
+        return "📍";
+
+    }
+
+  }
+
+
+
+
+
+  return (
+
+    <div className="
+
       relative
+
       w-full
+
       max-w-xl
+
       aspect-square
+
       mx-auto
+
       rounded-full
+
       bg-black
+
       border
-      border-green-500/40
+
+      border-cyan-400/40
+
       overflow-hidden
-      shadow-[0_0_40px_rgba(0,255,100,0.2)]
-      "
 
-    >
+      shadow-[0_0_60px_rgba(0,255,255,0.35)]
 
-
+    ">
 
 
+      {
+        modoFantasma &&
 
-      {/* BÚSSOLA */}
+        <div className="
 
-      <div
+          absolute
 
-        className="
-        absolute
-        top-6
-        left-1/2
-        -translate-x-1/2
-        z-20
-        "
+          inset-0
 
-      >
+          bg-cyan-400/5
 
-        <div
+          animate-pulse
 
-          className="
-          bg-zinc-900
-          border
-          border-green-500/40
-          rounded-full
-          w-20
-          h-20
-          flex
-          items-center
-          justify-center
-          text-4xl
-          shadow-[0_0_20px_rgba(0,255,100,0.3)]
-          "
+        "/>
 
-          style={{
-
-            transform:
-
-              `rotate(${direcao}deg)`
-
-          }}
-
-        >
-
-          🧭
-
-        </div>
-
-
-      </div>
+      }
 
 
 
 
 
-
-
-
-      <div
-
-        className="
+      <div className="
         absolute
         inset-10
         rounded-full
         border
-        border-green-500/20
-        "
-
-      />
+        border-cyan-400/20
+      "/>
 
 
-
-      <div
-
-        className="
+      <div className="
         absolute
         inset-24
         rounded-full
         border
-        border-green-500/20
-        "
-
-      />
+        border-cyan-400/20
+      "/>
 
 
-
-
-
-
-      <div
-
-        className="
+      <div className="
         absolute
         left-1/2
         top-0
         bottom-0
         w-px
-        bg-green-500/20
-        "
-
-      />
+        bg-cyan-400/20
+      "/>
 
 
-
-      <div
-
-        className="
+      <div className="
         absolute
         top-1/2
         left-0
         right-0
         h-px
-        bg-green-500/20
-        "
-
-      />
+        bg-cyan-400/20
+      "/>
 
 
 
 
 
-
-
-
-
-      {/* VOCÊ */}
-
-      <div
-
-        className="
+      <div className="
         absolute
         left-1/2
         top-1/2
         -translate-x-1/2
         -translate-y-1/2
-        "
+      ">
 
-      >
+        <div className="
 
-        <div
-
-          className="
           w-8
-          h-8
-          rounded-full
-          bg-green-400
-          animate-pulse
-          shadow-[0_0_25px_rgba(0,255,100,1)]
-          "
 
-        />
+          h-8
+
+          rounded-full
+
+          bg-cyan-400
+
+          animate-pulse
+
+          shadow-[0_0_35px_rgba(0,255,255,1)]
+
+        "/>
 
       </div>
 
@@ -430,12 +343,7 @@ export default function OrionMap({
 
 
 
-
-
-      {/* JOGADORES */}
-
       {
-
         jogadores
 
         .filter(
@@ -444,93 +352,127 @@ export default function OrionMap({
 
             j.id !== jogador.id &&
 
-            j.status !== "morto" &&
-
             j.localizacao
 
         )
 
         .map(
 
-          (j:any)=>(
+          (j:any)=>{
 
 
-            (()=>{
-
-
-              const pos =
-
-                pontoAlvo(
-
-                  j.localizacao
-
-                );
-
-
-
-              let cor =
-
-                "bg-blue-400 shadow-[0_0_15px_rgba(0,150,255,1)]";
-
-
-
-              if(j.papel === "hacker"){
-
-                cor =
-
-                "bg-purple-400 shadow-[0_0_15px_rgba(180,0,255,1)]";
-
-              }
-
-
-
-              if(
-
-                j.papel === "infiltrado" &&
-
-                jogador.papel === "infiltrado"
-
-              ){
-
-                cor =
-
-                "bg-red-500 shadow-[0_0_15px_rgba(255,0,0,1)]";
-
-              }
-
-
-
-              return (
-
-                <div
-
-                  key={j.id}
-
-                  className={`
-                  absolute
-                  w-5
-                  h-5
-                  rounded-full
-                  ${cor}
-                  `}
-
-                  style={{
-
-                    left:`${pos.x}%`,
-
-                    top:`${pos.y}%`
-
-                  }}
-
-                />
-
+            const pos =
+              pontoAlvo(
+                j.localizacao
               );
 
 
-            })()
+            const dados =
+              dadosJogador(j);
 
 
-          )
+
+            return (
+
+              <div
+
+                key={j.id}
+
+                className="
+                  absolute
+                  -translate-x-1/2
+                  -translate-y-1/2
+                "
+
+                style={{
+
+                  left:`${pos.x}%`,
+
+                  top:`${pos.y}%`
+
+                }}
+
+              >
+
+
+                <div className={`
+
+                  w-7
+
+                  h-7
+
+                  rounded-full
+
+                  ${dados.cor}
+
+                  animate-pulse
+
+                  border
+
+                  border-white/30
+
+                `}/>
+
+
+
+                {
+                  modoFantasma &&
+
+                  <div className="
+
+                    mt-2
+
+                    bg-black/90
+
+                    border
+
+                    border-cyan-400/40
+
+                    rounded-lg
+
+                    px-3
+
+                    py-2
+
+                    text-center
+
+                    text-xs
+
+                    text-white
+
+                    whitespace-nowrap
+
+                    shadow-[0_0_20px_rgba(0,255,255,0.4)]
+
+                  ">
+
+                    <strong>
+
+                      {j.nome}
+
+                    </strong>
+
+
+                    <br/>
+
+
+                    <span className="text-cyan-300">
+
+                      {dados.tag}
+
+                    </span>
+
+
+                  </div>
+
+                }
+
+
+              </div>
+
+            );
+
+          }
 
         )
 
@@ -543,11 +485,7 @@ export default function OrionMap({
 
 
 
-
-      {/* MISSÕES */}
-
       {
-
         missoes
 
         .filter(
@@ -560,69 +498,53 @@ export default function OrionMap({
 
         .map(
 
-          (m:any)=>(
+          (m:any)=>{
 
 
-            (()=>{
-
-
-              const pos =
-
-                pontoAlvo(
-
-                  m.localizacao
-
-                );
-
-
-
-              const distancia =
-
-                calcularDistanciaGPS(
-
-                  jogador.localizacao,
-
-                  m.localizacao
-
-                );
-
-
-
-              return (
-
-                <div
-
-                  key={m.id}
-
-                  className={`
-                  absolute
-                  text-3xl
-                  ${distancia <= 5 ? "animate-pulse scale-125" : ""}
-                  `}
-
-                  style={{
-
-                    left:`${pos.x}%`,
-
-                    top:`${pos.y}%`,
-
-                    transform:"translate(-50%,-50%)"
-
-                  }}
-
-                >
-
-                  {iconeMissao(m.tipo)}
-
-                </div>
-
+            const pos =
+              pontoAlvo(
+                m.localizacao
               );
 
 
-            })()
+
+            return (
+
+              <div
+
+                key={m.id}
+
+                className="
+
+                  absolute
+
+                  text-3xl
+
+                  drop-shadow-[0_0_10px_cyan]
+
+                "
+
+                style={{
+
+                  left:`${pos.x}%`,
+
+                  top:`${pos.y}%`,
+
+                  transform:
+                  "translate(-50%,-50%)"
+
+                }}
+
+              >
+
+                {iconeMissao(m.tipo)}
+
+              </div>
+
+            );
 
 
-          )
+          }
 
         )
 
@@ -634,28 +556,43 @@ export default function OrionMap({
 
 
 
+      <div className="
 
-
-
-      <div
-
-        className="
         absolute
+
         bottom-5
+
         left-0
+
         right-0
+
         text-center
-        text-green-400
-        tracking-widest
-        text-sm
-        "
 
-      >
+        text-cyan-300
 
-        ORION TACTICAL RADAR
+        tracking-[0.3em]
+
+        text-xs
+
+      ">
+
+
+        {
+
+          modoFantasma
+
+          ?
+
+          "ORION // SPECTRAL VISION"
+
+          :
+
+          "ORION // TACTICAL RADAR"
+
+        }
+
 
       </div>
-
 
 
 
@@ -663,5 +600,4 @@ export default function OrionMap({
 
   );
 
-
-} 
+}

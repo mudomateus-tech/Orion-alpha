@@ -1,11 +1,13 @@
 import {
   doc,
-  getDoc
+  getDoc,
+  setDoc
 } from "firebase/firestore";
 
 import {
   db
 } from "@/lib/firebase";
+
 
 
 export interface SalaMapa {
@@ -25,7 +27,8 @@ export interface SalaMapa {
 }
 
 
-export interface MapaORION {
+
+export interface MapaCasa {
 
   nome:string;
 
@@ -37,41 +40,96 @@ export interface MapaORION {
 
 
 
+
+export async function salvarMapa(
+
+  operacaoId:string,
+
+  mapa:MapaCasa
+
+){
+
+
+await setDoc(
+
+doc(
+
+db,
+
+"operacoes",
+
+operacaoId,
+
+"config",
+
+"mapa"
+
+),
+
+{
+
+...mapa,
+
+criadoEm:Date.now()
+
+}
+
+);
+
+
+}
+
+
+
+
+
+
 export async function buscarMapa(
 
   operacaoId:string
 
 ){
 
-  const referencia = doc(
 
-    db,
+const referencia =
 
-    "operacoes",
+doc(
 
-    operacaoId,
+db,
 
-    "config",
+"operacoes",
 
-    "mapa"
+operacaoId,
 
-  );
+"config",
 
+"mapa"
 
-  const resultado = await getDoc(
-
-    referencia
-
-  );
+);
 
 
-  if(!resultado.exists()){
 
-    return null;
+const resultado =
 
-  }
+await getDoc(
+
+referencia
+
+);
 
 
-  return resultado.data() as MapaORION;
+
+if(!resultado.exists()){
+
+
+return null;
+
+
+}
+
+
+
+return resultado.data() as MapaCasa;
+
 
 }

@@ -16,7 +16,9 @@ import {
   verificarVitoria
 } from "@/services/victoryService";
 
-
+import {
+  registrarEventoProgressao
+} from "@/services/progressionService";
 
 
 
@@ -44,15 +46,11 @@ export async function eliminarJogador(
 
 
 
-
-
   const snapshot = await getDoc(
 
     referencia
 
   );
-
-
 
 
 
@@ -68,11 +66,7 @@ export async function eliminarJogador(
 
 
 
-
-
   const dados:any = snapshot.data();
-
-
 
 
 
@@ -88,8 +82,6 @@ export async function eliminarJogador(
 
 
 
-
-
   if(!atacante){
 
     throw new Error(
@@ -99,8 +91,6 @@ export async function eliminarJogador(
     );
 
   }
-
-
 
 
 
@@ -116,8 +106,6 @@ export async function eliminarJogador(
 
 
 
-
-
   if(atacante.status === "morto"){
 
     throw new Error(
@@ -127,8 +115,6 @@ export async function eliminarJogador(
     );
 
   }
-
-
 
 
 
@@ -144,8 +130,6 @@ export async function eliminarJogador(
 
 
 
-
-
   if(!alvo){
 
     throw new Error(
@@ -155,8 +139,6 @@ export async function eliminarJogador(
     );
 
   }
-
-
 
 
 
@@ -172,13 +154,7 @@ export async function eliminarJogador(
 
 
 
-
-
-  if(
-
-    alvo.papel === "infiltrado"
-
-  ){
+  if(alvo.papel === "infiltrado"){
 
     throw new Error(
 
@@ -190,13 +166,7 @@ export async function eliminarJogador(
 
 
 
-
-
-  if(
-
-    alvo.papel === "hacker"
-
-  ){
+  if(alvo.papel === "hacker"){
 
     throw new Error(
 
@@ -217,11 +187,7 @@ export async function eliminarJogador(
       (j:any)=>{
 
 
-        if(
-
-          j.id === alvoId
-
-        ){
+        if(j.id === alvoId){
 
           return {
 
@@ -279,7 +245,6 @@ export async function eliminarJogador(
 
       }
 
-
     }
 
   );
@@ -313,8 +278,21 @@ export async function eliminarJogador(
 
         alvoId
 
-
     }
+
+  );
+
+
+
+
+
+  // PROGRESSÃO DO INFILTRADO
+
+  await registrarEventoProgressao(
+
+    atacanteId,
+
+    "eliminacao"
 
   );
 
@@ -334,73 +312,6 @@ export async function eliminarJogador(
 
 
 
-  if(resultadoVitoria?.finalizada){
-
-
-    await updateDoc(
-
-      referencia,
-
-      {
-
-        status:
-
-          "finalizada",
-
-
-        vencedor:
-
-          resultadoVitoria.vencedor,
-
-
-        finalizadaEm:
-
-          Date.now()
-
-      }
-
-    );
-
-
-
-
-
-    await criarEvento(
-
-      operacaoId,
-
-      {
-
-        tipo:
-
-          "vitoria",
-
-
-        titulo:
-
-          "🏆 Operação encerrada",
-
-
-        descricao:
-
-          resultadoVitoria.vencedor === "agentes"
-
-            ? "Os agentes venceram a operação."
-
-            : "Os infiltrados venceram a operação."
-
-
-      }
-
-    );
-
-
-  }
-
-
-
-
-
   return {
 
     sucesso:true,
@@ -408,7 +319,7 @@ export async function eliminarJogador(
 
     finalizada:
 
-      resultadoVitoria?.finalizada ?? false,
+      resultadoVitoria?.vencedor !== null,
 
 
     vencedor:
@@ -416,6 +327,5 @@ export async function eliminarJogador(
       resultadoVitoria?.vencedor ?? null
 
   };
-
 
 }

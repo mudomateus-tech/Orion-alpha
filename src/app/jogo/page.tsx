@@ -67,13 +67,21 @@ atualizarPosicaoJogador,
 observarPosicoes
 } from "@/services/positionService";
 
+import {
+iniciarSensorMovimento,
+pararSensorMovimento
+} from "@/services/motionService";
+
 
 
 function JogoContent(){
 
+
 const params = useSearchParams();
 
+
 const operacaoId = params.get("id");
+
 
 const jogadorId = params.get("jogador");
 
@@ -81,15 +89,22 @@ const jogadorId = params.get("jogador");
 
 const {
 operacao
-} = useOperation(operacaoId);
+} = useOperation(
+
+operacaoId
+
+);
 
 
 
 const {
 jogador
 } = usePlayer(
+
 operacaoId,
+
 jogadorId
+
 );
 
 
@@ -97,13 +112,20 @@ jogadorId
 const {
 finalizada,
 vencedor
-} = useVictory(operacaoId);
+} = useVictory(
+
+operacaoId
+
+);
 
 
 
 useLocationTracker(
+
 operacaoId,
+
 jogadorId
+
 );
 
 
@@ -153,6 +175,7 @@ const jogadorMorto =
 jogador?.status === "morto";
 useEffect(()=>{
 
+
 async function preparar(){
 
 
@@ -168,6 +191,7 @@ operacao.missoes.length === 0)
 
 ){
 
+
 await criarMissoes(
 
 operacaoId
@@ -178,16 +202,20 @@ operacaoId
 }
 
 
+
 }
 
 
 preparar();
 
 
+
 },[
 operacao,
 operacaoId
 ]);
+
+
 
 
 
@@ -218,7 +246,9 @@ jogadores
 );
 
 
+
 }
+
 
 );
 
@@ -236,19 +266,35 @@ operacaoId
 
 
 
-function moverJogador(
 
-dx:number,
 
-dy:number
+useEffect(()=>{
+
+
+if(
+
+!operacaoId ||
+
+!jogadorId
 
 ){
+
+return;
+
+}
+
+
+
+
+iniciarSensorMovimento(
+
+(movimento)=>{
 
 
 setPosicao((atual)=>{
 
 
-const novaPosicao = {
+const nova = {
 
 
 x:Math.max(
@@ -259,7 +305,7 @@ Math.min(
 
 100,
 
-atual.x + dx
+atual.x + movimento.x
 
 )
 
@@ -275,7 +321,7 @@ Math.min(
 
 100,
 
-atual.y + dy
+atual.y + movimento.y
 
 )
 
@@ -287,14 +333,6 @@ atual.y + dy
 
 
 
-if(
-
-operacaoId &&
-
-jogadorId
-
-){
-
 
 atualizarPosicaoJogador(
 
@@ -305,21 +343,20 @@ operacaoId,
 jogadorId,
 
 
-novaPosicao.x,
+nova.x,
 
 
-novaPosicao.y
+nova.y
+
 
 
 );
 
 
-}
 
 
 
-
-return novaPosicao;
+return nova;
 
 
 
@@ -328,6 +365,29 @@ return novaPosicao;
 
 
 }
+
+);
+
+
+
+
+
+return ()=>{
+
+
+pararSensorMovimento();
+
+
+};
+
+
+
+},[
+operacaoId,
+jogadorId
+]);
+
+
 
 
 
@@ -350,6 +410,7 @@ setMensagem(
 "Você está eliminado."
 
 );
+
 
 
 return;
@@ -377,10 +438,12 @@ setMensagem(
 );
 
 
+
 return;
 
 
 }
+
 
 
 
@@ -408,11 +471,11 @@ missao.localizacao.longitude
 
 
 
+
 if(distancia > 5){
 
 
 setMensagem(
-
 
 "Aproxime-se da missão. Distância: "
 
@@ -424,9 +487,8 @@ Math.round(distancia)
 
 " metros."
 
-
-
 );
+
 
 
 return;
@@ -437,11 +499,17 @@ return;
 
 
 
-setTarefaAtual(missao);
+
+setTarefaAtual(
+
+missao
+
+);
 
 
 
 }
+
 
 
 
@@ -495,13 +563,12 @@ setMensagem(
 
 
 
-
-
 setTarefaAtual(null);
 
 
 
 }
+
 
 
 
@@ -525,16 +592,14 @@ return;
 
 
 
+
 const resultado =
 
 await executarSabotagem(
 
-
 operacaoId,
 
-
 jogadorId
-
 
 );
 
@@ -584,7 +649,6 @@ bg-black
 text-white
 p-6
 ">
-
 
 
 <Header
@@ -671,6 +735,7 @@ status:j.status
 }
 
 
+
 missoes={
 
 operacao?.missoes || []
@@ -687,55 +752,23 @@ operacao?.missoes || []
 
 
 
-<div className="mt-5 flex gap-3 justify-center">
+<div className="
+mt-4
+text-center
+text-cyan-300
+text-xs
+tracking-widest
+">
 
+POSIÇÃO:
 
-<Button
+{Math.round(posicao.x)}
 
-onClick={()=>moverJogador(0,-5)}
+/
 
->
-
-⬆️
-
-</Button>
-
-
-<Button
-
-onClick={()=>moverJogador(0,5)}
-
->
-
-⬇️
-
-</Button>
-
-
-<Button
-
-onClick={()=>moverJogador(-5,0)}
-
->
-
-⬅️
-
-</Button>
-
-
-<Button
-
-onClick={()=>moverJogador(5,0)}
-
->
-
-➡️
-
-</Button>
-
+{Math.round(posicao.y)}
 
 </div>
-
 
 
 
@@ -849,6 +882,7 @@ mb-3
 </h2>
 
 
+
 <p>
 
 {missao.descricao}
@@ -868,6 +902,7 @@ EXECUTAR
 </Button>
 
 
+
 </div>
 
 
@@ -878,11 +913,11 @@ EXECUTAR
 }
 
 
+
 </Card>
 
 
 }
-
 
 
 
@@ -924,8 +959,6 @@ SABOTAR SISTEMA
 
 
 
-
-
 {
 
 jogador.papel === "infiltrado" &&
@@ -960,6 +993,7 @@ operacao?.jogadores || []
 
 
 
+
 {
 
 mensagem &&
@@ -977,6 +1011,7 @@ mt-5
 
 
 }
+
 
 
 
@@ -998,7 +1033,6 @@ return (
 
 <Suspense
 
-
 fallback={
 
 <main className="
@@ -1015,7 +1049,6 @@ Carregando jogo...
 </main>
 
 }
-
 
 >
 

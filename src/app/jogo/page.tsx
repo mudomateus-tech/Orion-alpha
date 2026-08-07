@@ -6,6 +6,7 @@ import {
   useState
 } from "react";
 
+
 import {
   useSearchParams
 } from "next/navigation";
@@ -31,10 +32,9 @@ import {
 } from "@/hooks/useVictory";
 
 
+
 import Header from "@/components/ui/Header";
-
 import Card from "@/components/ui/Card";
-
 import Button from "@/components/ui/Button";
 
 
@@ -47,13 +47,17 @@ import GameHUD from "@/components/game/GameHUD";
 
 import RoleHUD from "@/components/game/RoleHUD";
 
+
 import TaskEngine from "@/components/tasks/TaskEngine";
+
 
 import GhostModeButton from "@/components/game/GhostModeButton";
 
 import GhostOverlay from "@/components/game/GhostOverlay";
 
+
 import VictoryBanner from "@/components/victory/VictoryBanner";
+
 
 
 import {
@@ -71,9 +75,11 @@ import {
 } from "@/services/sabotageService";
 
 
+
 import {
   calcularDistancia
 } from "@/utils/distance";
+
 
 
 import {
@@ -82,16 +88,26 @@ import {
 } from "@/services/positionService";
 
 
+
 import {
   iniciarSensorMovimento,
   pararSensorMovimento
 } from "@/services/motionService";
 
 
+
 import {
-  buscarMapa,
-  MapaORION
-} from "@/services/mapService";
+  buscarCalibracao,
+  CalibracaoCasa
+} from "@/services/calibrationService";
+
+
+
+import {
+  converterPosicaoRealParaMapa,
+  suavizarMovimento
+} from "@/services/positionEngine";
+
 
 
 
@@ -101,98 +117,211 @@ function JogoContent(){
 const params = useSearchParams();
 
 
-const operacaoId =
-  params.get("id");
+const operacaoId = params.get("id");
 
 
-const jogadorId =
-  params.get("jogador");
+const jogadorId = params.get("jogador");
 
 
 
 const {
-  operacao
+
+operacao
+
 } = useOperation(
-  operacaoId
+
+operacaoId
+
 );
 
 
 
+
 const {
-  jogador
+
+jogador
+
 } = usePlayer(
-  operacaoId,
-  jogadorId
+
+operacaoId,
+
+jogadorId
+
 );
+
 
 
 
 const {
-  finalizada,
-  vencedor
+
+finalizada,
+
+vencedor
+
 } = useVictory(
-  operacaoId
+
+operacaoId
+
 );
+
 
 
 
 useLocationTracker(
-  operacaoId,
-  jogadorId
+
+operacaoId,
+
+jogadorId
+
 );
 
 
 
+
 const [
-  mensagem,
-  setMensagem
+
+mensagem,
+
+setMensagem
+
 ] = useState("");
 
 
 
+
 const [
-  tarefaAtual,
-  setTarefaAtual
+
+tarefaAtual,
+
+setTarefaAtual
+
 ] = useState<any>(null);
 
 
 
+
 const [
-  modoFantasma,
-  setModoFantasma
+
+modoFantasma,
+
+setModoFantasma
+
 ] = useState(false);
 
 
 
+
 const [
-  posicao,
-  setPosicao
+
+calibracao,
+
+setCalibracao
+
+] = useState<CalibracaoCasa | null>(null);
+
+
+
+
+const [
+
+posicao,
+
+setPosicao
+
 ] = useState({
 
-  x:50,
+x:50,
 
-  y:50
+y:50
 
 });
 
 
 
+
 const [
-  jogadoresOnline,
-  setJogadoresOnline
+
+posicaoReal,
+
+setPosicaoReal
+
+] = useState({
+
+x:0,
+
+y:0
+
+});
+
+
+
+
+const [
+
+jogadoresOnline,
+
+setJogadoresOnline
+
 ] = useState<any[]>([]);
 
 
 
-const [
-  mapa,
-  setMapa
-] = useState<MapaORION | null>(null);
-
-
 
 const jogadorMorto =
-  jogador?.status === "morto";
+
+jogador?.status === "morto";
+
+useEffect(()=>{
+
+
+async function carregarCalibracao(){
+
+
+if(!operacaoId){
+
+return;
+
+}
+
+
+
+const dados =
+
+await buscarCalibracao(
+
+operacaoId
+
+);
+
+
+
+if(dados){
+
+setCalibracao(
+
+dados
+
+);
+
+}
+
+
+
+}
+
+
+
+carregarCalibracao();
+
+
+
+},[
+operacaoId
+]);
+
+
+
+
 
 
 
@@ -204,67 +333,45 @@ async function preparar(){
 
 if(
 
-  operacaoId &&
+operacaoId &&
 
-  operacao &&
+operacao &&
 
-  (!operacao.missoes ||
+(!operacao.missoes ||
 
-  operacao.missoes.length === 0)
+operacao.missoes.length === 0)
 
 ){
 
-  await criarMissoes(
-    operacaoId
-  );
+
+await criarMissoes(
+
+operacaoId
+
+);
+
 
 }
 
 
+
 }
+
 
 
 preparar();
 
 
-},[
-  operacao,
-  operacaoId
-]);
-useEffect(()=>{
-
-
-  if(!operacaoId){
-
-    return;
-
-  }
-
-
-
-  const cancelar = observarPosicoes(
-
-    operacaoId,
-
-    (jogadores)=>{
-
-      setJogadoresOnline(
-        jogadores
-      );
-
-    }
-
-  );
-
-
-
-  return ()=>cancelar();
-
-
 
 },[
-  operacaoId
+operacao,
+
+operacaoId
+
 ]);
+
+
+
 
 
 
@@ -273,45 +380,45 @@ useEffect(()=>{
 useEffect(()=>{
 
 
-  async function carregarMapa(){
+if(!operacaoId){
 
+return;
 
-    if(!operacaoId){
-
-      return;
-
-    }
+}
 
 
 
-    const resultado =
+const cancelar =
 
-      await buscarMapa(
+observarPosicoes(
 
-        operacaoId
+operacaoId,
 
-      );
-
-
-
-    if(resultado){
-
-      setMapa(resultado);
-
-    }
+(jogadores)=>{
 
 
-  }
+setJogadoresOnline(
+
+jogadores
+
+);
+
+
+}
+
+);
 
 
 
-  carregarMapa();
+return ()=>cancelar();
 
 
 
 },[
-  operacaoId
+operacaoId
 ]);
+
+
 
 
 
@@ -324,13 +431,13 @@ useEffect(()=>{
 
 if(
 
-  !operacaoId ||
+!operacaoId ||
 
-  !jogadorId
+!jogadorId
 
 ){
 
-  return;
+return;
 
 }
 
@@ -341,48 +448,62 @@ iniciarSensorMovimento(
 (movimento)=>{
 
 
-setPosicao((atual)=>{
+
+setPosicaoReal((atual)=>{
 
 
-const nova = {
+const novaReal = {
 
 
 x:
 
-Math.max(
+atual.x +
 
-0,
-
-Math.min(
-
-100,
-
-atual.x + movimento.x
-
-)
-
-),
+movimento.x,
 
 
 
 y:
 
-Math.max(
+atual.y +
 
-0,
-
-Math.min(
-
-100,
-
-atual.y + movimento.y
-
-)
-
-)
+movimento.y
 
 
 };
+
+
+
+if(calibracao){
+
+
+
+const destino =
+
+converterPosicaoRealParaMapa(
+
+novaReal.x,
+
+novaReal.y,
+
+calibracao
+
+);
+
+
+
+setPosicao((atualMapa)=>{
+
+
+const suavizada =
+
+suavizarMovimento(
+
+atualMapa,
+
+destino
+
+);
 
 
 
@@ -392,18 +513,32 @@ operacaoId,
 
 jogadorId,
 
-nova.x,
+suavizada.x,
 
-nova.y
+suavizada.y
 
 );
 
 
 
-return nova;
+return suavizada;
+
 
 
 });
+
+
+
+}
+
+
+
+return novaReal;
+
+
+
+});
+
 
 
 }
@@ -418,13 +553,19 @@ return ()=>{
 pararSensorMovimento();
 
 
+
 };
 
 
 
 },[
+
 operacaoId,
-jogadorId
+
+jogadorId,
+
+calibracao
+
 ]);
 
 
@@ -537,8 +678,6 @@ missao
 
 
 
-
-
 async function concluirTarefa(){
 
 
@@ -581,12 +720,8 @@ setMensagem(
 setTarefaAtual(null);
 
 
+
 }
-
-
-
-
-
 
 async function sabotar(){
 
@@ -625,7 +760,13 @@ resultado.titulo
 
 
 }
+
+
+
+
+
 if(!jogador){
+
 
 return (
 
@@ -644,6 +785,7 @@ Carregando agente...
 
 );
 
+
 }
 
 
@@ -658,7 +800,6 @@ bg-black
 text-white
 p-6
 ">
-
 
 
 <Header
@@ -690,7 +831,6 @@ vencedor={vencedor}
 
 
 
-
 <GameHUD
 
 jogador={jogador}
@@ -698,7 +838,6 @@ jogador={jogador}
 operacao={operacao}
 
 />
-
 
 
 
@@ -759,7 +898,7 @@ operacao?.missoes || []
 
 salas={
 
-mapa?.salas || []
+operacao?.mapa?.salas || []
 
 }
 
@@ -778,13 +917,22 @@ mt-3
 text-xs
 ">
 
-POSIÇÃO:
+ORION POSITION ENGINE
+
+<br/>
+
+MAP:
 
 {Math.round(posicao.x)}
+
+%
 
 /
 
 {Math.round(posicao.y)}
+
+%
+
 
 </div>
 
@@ -922,10 +1070,12 @@ EXECUTAR
 
 )
 
+
 )
 
 
 }
+
 
 
 </Card>

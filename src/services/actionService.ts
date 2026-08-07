@@ -16,7 +16,9 @@ import {
   verificarVitoria
 } from "@/services/victoryService";
 
-
+import {
+  registrarEventoProgressao
+} from "@/services/progressionService";
 
 
 
@@ -44,15 +46,11 @@ export async function concluirMissao(
 
 
 
-
-
   const snapshot = await getDoc(
 
     referencia
 
   );
-
-
 
 
 
@@ -68,13 +66,7 @@ export async function concluirMissao(
 
 
 
-
-
-
   const dados:any = snapshot.data();
-
-
-
 
 
 
@@ -90,9 +82,6 @@ export async function concluirMissao(
 
 
 
-
-
-
   if(!jogador){
 
     throw new Error(
@@ -102,9 +91,6 @@ export async function concluirMissao(
     );
 
   }
-
-
-
 
 
 
@@ -126,10 +112,6 @@ export async function concluirMissao(
 
 
 
-
-
-
-
   const missao =
 
     dados.missoes?.find(
@@ -142,9 +124,6 @@ export async function concluirMissao(
 
 
 
-
-
-
   if(!missao){
 
     throw new Error(
@@ -154,9 +133,6 @@ export async function concluirMissao(
     );
 
   }
-
-
-
 
 
 
@@ -173,11 +149,6 @@ export async function concluirMissao(
     );
 
   }
-
-
-
-
-
 
 
 
@@ -214,9 +185,6 @@ export async function concluirMissao(
       }
 
     );
-
-
-
 
 
 
@@ -262,9 +230,6 @@ export async function concluirMissao(
 
 
 
-
-
-
   await criarEvento(
 
     operacaoId,
@@ -301,6 +266,17 @@ export async function concluirMissao(
 
 
 
+  // PROGRESSÃO DO AGENTE
+
+  await registrarEventoProgressao(
+
+    jogadorId,
+
+    "missao"
+
+  );
+
+
 
 
 
@@ -312,11 +288,6 @@ export async function concluirMissao(
 
 
 
-
-
-
-
   return true;
-
 
 }

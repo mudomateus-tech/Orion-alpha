@@ -12,6 +12,10 @@ import {
   criarEvento
 } from "@/services/eventService";
 
+import {
+  registrarEventoProgressao
+} from "@/services/progressionService";
+
 
 
 export async function verificarVitoria(
@@ -142,11 +146,7 @@ export async function verificarVitoria(
 
 
 
-  let vencedor:string|null =
-
-    null;
-
-
+  let vencedor:string|null = null;
 
   let mensagem = "";
 
@@ -158,18 +158,17 @@ export async function verificarVitoria(
 
   ){
 
-    vencedor =
-
-      "agentes";
-
-
+    vencedor = "agentes";
 
     mensagem =
 
       "Os agentes completaram todas as missões.";
 
   }
-    if(
+
+
+
+  if(
 
     !vencedor &&
 
@@ -177,11 +176,7 @@ export async function verificarVitoria(
 
   ){
 
-    vencedor =
-
-      "infiltrados";
-
-
+    vencedor = "infiltrados";
 
     mensagem =
 
@@ -191,11 +186,14 @@ export async function verificarVitoria(
 
 
 
+
+
   if(
 
     vencedor
 
   ){
+
 
     await updateDoc(
 
@@ -206,7 +204,6 @@ export async function verificarVitoria(
         status:
 
           "finalizada",
-
 
 
         vitoria:{
@@ -227,6 +224,8 @@ export async function verificarVitoria(
 
 
 
+
+
     await criarEvento(
 
       operacaoId,
@@ -238,17 +237,14 @@ export async function verificarVitoria(
           "jogo_finalizado",
 
 
-
         titulo:
 
           "🏆 Operação finalizada",
 
 
-
         descricao:
 
           mensagem,
-
 
 
         jogadorId:
@@ -259,8 +255,82 @@ export async function verificarVitoria(
 
     );
 
+
+
+
+
+    for(
+
+      const jogador of jogadores
+
+    ){
+
+
+      if(
+
+        jogador.status === "morto"
+
+      ){
+
+        continue;
+
+      }
+
+
+
+      if(
+
+        jogador.papel === vencedor ||
+
+        (
+
+          vencedor === "agentes" &&
+
+          (
+
+            jogador.papel === "agente" ||
+
+            jogador.papel === "hacker"
+
+          )
+
+        )
+
+      ){
+
+        await registrarEventoProgressao(
+
+          jogador.id,
+
+          "vitoria"
+
+        );
+
+      }
+
+      else{
+
+
+        await registrarEventoProgressao(
+
+          jogador.id,
+
+          "derrota"
+
+        );
+
+
+      }
+
+
+    }
+
+
   }
-    return {
+
+
+
+  return {
 
     vencedor,
 

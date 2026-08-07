@@ -26,11 +26,14 @@ import {
   useVictory
 } from "@/hooks/useVictory";
 
+
 import Header from "@/components/ui/Header";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 
-import OrionMap from "@/components/map/OrionMap";
+
+import IndoorMap from "@/components/map/IndoorMap";
+
 
 import EliminationButton from "@/components/game/EliminationButton";
 
@@ -46,17 +49,21 @@ import GhostOverlay from "@/components/game/GhostOverlay";
 
 import VictoryBanner from "@/components/victory/VictoryBanner";
 
+
 import {
   criarMissoes
 } from "@/services/mission";
+
 
 import {
   concluirMissao
 } from "@/services/actionService";
 
+
 import {
   executarSabotagem
 } from "@/services/sabotageService";
+
 
 import {
   calcularDistancia
@@ -64,9 +71,12 @@ import {
 
 
 
+
 function JogoContent(){
 
+
   const params = useSearchParams();
+
 
   const operacaoId = params.get("id");
 
@@ -74,16 +84,18 @@ function JogoContent(){
 
 
 
-  const { operacao } =
-    useOperation(operacaoId);
+  const {
+    operacao
+  } = useOperation(operacaoId);
 
 
 
-  const { jogador } =
-    usePlayer(
-      operacaoId,
-      jogadorId
-    );
+  const {
+    jogador
+  } = usePlayer(
+    operacaoId,
+    jogadorId
+  );
 
 
 
@@ -91,6 +103,7 @@ function JogoContent(){
     finalizada,
     vencedor
   } = useVictory(operacaoId);
+
 
 
 
@@ -131,25 +144,37 @@ function JogoContent(){
 
   useEffect(()=>{
 
+
     async function preparar(){
 
+
       if(
+
         operacaoId &&
+
         operacao &&
+
         (!operacao.missoes ||
+
         operacao.missoes.length === 0)
+
       ){
 
         await criarMissoes(
+
           operacaoId
+
         );
 
+
       }
+
 
     }
 
 
     preparar();
+
 
 
   },[
@@ -161,7 +186,9 @@ function JogoContent(){
 
 
 
+
   async function abrirMissao(missao:any){
+
 
     if(jogadorMorto){
 
@@ -174,13 +201,17 @@ function JogoContent(){
     }
 
 
+
     if(
+
       !jogador?.localizacao ||
+
       !missao?.localizacao
+
     ){
 
       setMensagem(
-        "GPS indisponível."
+        "Localização indisponível."
       );
 
       return;
@@ -188,7 +219,10 @@ function JogoContent(){
     }
 
 
+
+
     const distancia =
+
       calcularDistancia(
 
         jogador.localizacao.latitude,
@@ -203,20 +237,34 @@ function JogoContent(){
 
 
 
+
     if(distancia > 5){
 
+
       setMensagem(
+
         "Aproxime-se da missão. Distância: "
-        + Math.round(distancia)
-        + " metros."
+
+        +
+
+        Math.round(distancia)
+
+        +
+
+        " metros."
+
       );
 
+
       return;
+
 
     }
 
 
+
     setTarefaAtual(missao);
+
 
   }
 
@@ -225,17 +273,24 @@ function JogoContent(){
 
 
 
+
   async function concluirTarefa(){
 
+
     if(
+
       !operacaoId ||
+
       !jogadorId ||
+
       !tarefaAtual
+
     ){
 
       return;
 
     }
+
 
 
     await concluirMissao(
@@ -249,12 +304,18 @@ function JogoContent(){
     );
 
 
+
     setMensagem(
+
       "Missão concluída!"
+
     );
 
 
+
     setTarefaAtual(null);
+
+
 
   }
 
@@ -263,11 +324,16 @@ function JogoContent(){
 
 
 
+
   async function sabotar(){
 
+
     if(
+
       !operacaoId ||
+
       !jogadorId
+
     ){
 
       return;
@@ -275,7 +341,9 @@ function JogoContent(){
     }
 
 
+
     const resultado =
+
       await executarSabotagem(
 
         operacaoId,
@@ -285,9 +353,13 @@ function JogoContent(){
       );
 
 
+
     setMensagem(
+
       resultado.titulo
+
     );
+
 
   }
 
@@ -295,7 +367,10 @@ function JogoContent(){
 
 
 
+
+
   if(!jogador){
+
 
     return (
 
@@ -314,6 +389,7 @@ function JogoContent(){
 
     );
 
+
   }
 
 
@@ -321,7 +397,9 @@ function JogoContent(){
 
 
 
+
   return (
+
 
     <main className="
       min-h-screen
@@ -333,9 +411,14 @@ function JogoContent(){
 
 
       <Header
+
         titulo="ORION"
+
         subtitulo="Operação em andamento"
+
       />
+
+
 
 
 
@@ -352,29 +435,69 @@ function JogoContent(){
 
 
 
+
+
+
       <GameHUD
+
         jogador={jogador}
+
         operacao={operacao}
+
       />
+
+
+
 
 
 
       <RoleHUD
+
         jogador={jogador}
+
         operacao={operacao}
+
       />
 
 
 
-      <OrionMap
 
-        operacao={operacao}
 
-        jogador={jogador}
 
-        modoFantasma={modoFantasma}
+
+
+      <IndoorMap
+
+        jogadores={
+
+          operacao?.jogadores?.map((j:any)=>({
+
+            id:j.id,
+
+            nome:j.nome,
+
+            x:j.x ?? 50,
+
+            y:j.y ?? 50,
+
+            status:j.status
+
+          }))
+
+        }
+
+
+        missoes={
+
+          operacao?.missoes || []
+
+        }
 
       />
+
+
+
+
 
 
 
@@ -395,15 +518,21 @@ function JogoContent(){
 
 
 
+
+
+
       {
         modoFantasma &&
 
         jogadorMorto &&
 
+
         <GhostOverlay
 
           jogadores={
+
             operacao?.jogadores || []
+
           }
 
         />
@@ -414,8 +543,13 @@ function JogoContent(){
 
 
 
+
+
+
+
       {
         tarefaAtual &&
+
 
         <TaskEngine
 
@@ -432,8 +566,12 @@ function JogoContent(){
 
 
 
+
+
+
       {
         !jogadorMorto &&
+
         !tarefaAtual &&
 
 
@@ -445,6 +583,7 @@ function JogoContent(){
             operacao?.missoes?.map(
 
               (missao:any)=>(
+
 
                 <div
 
@@ -458,6 +597,7 @@ function JogoContent(){
                   "
 
                 >
+
 
                   <h2>
 
@@ -488,6 +628,7 @@ function JogoContent(){
 
                 </div>
 
+
               )
 
             )
@@ -505,8 +646,12 @@ function JogoContent(){
 
 
 
+
+
+
       {
         jogador.papel === "infiltrado" &&
+
         !jogadorMorto &&
 
 
@@ -538,8 +683,11 @@ function JogoContent(){
 
 
 
+
+
       {
         jogador.papel === "infiltrado" &&
+
         !jogadorMorto &&
 
 
@@ -550,11 +698,12 @@ function JogoContent(){
           jogadorId={jogadorId}
 
           jogadores={
+
             operacao?.jogadores || []
+
           }
 
         />
-
 
       }
 
@@ -564,7 +713,10 @@ function JogoContent(){
 
 
 
+
+
       {
+
         mensagem &&
 
 
@@ -587,10 +739,10 @@ function JogoContent(){
 
     </main>
 
+
   );
 
 }
-
 
 
 
@@ -600,6 +752,7 @@ export default function Jogo(){
 
 
   return (
+
 
     <Suspense
 
@@ -622,10 +775,14 @@ export default function Jogo(){
 
     >
 
+
       <JogoContent/>
+
 
     </Suspense>
 
+
   );
+
 
 }

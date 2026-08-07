@@ -1,5 +1,7 @@
 "use client";
 
+import { Localizacao } from "@/types/Player";
+
 interface PlayerPosition {
   id: string;
   nome: string;
@@ -11,8 +13,7 @@ interface PlayerPosition {
 interface Mission {
   id: string;
   titulo?: string;
-  x: number;
-  y: number;
+  localizacao?: Localizacao;
 }
 
 interface IndoorMapProps {
@@ -27,6 +28,30 @@ export default function IndoorMap({
   missoes = []
 
 }: IndoorMapProps) {
+
+  function converter(localizacao?: Localizacao) {
+
+    if (!localizacao) {
+
+      return {
+
+        x: 50,
+
+        y: 50
+
+      };
+
+    }
+
+    return {
+
+      x: 50 + (localizacao.longitude * 100),
+
+      y: 50 - (localizacao.latitude * 100)
+
+    };
+
+  }
 
   return (
 
@@ -44,8 +69,6 @@ export default function IndoorMap({
       "
     >
 
-      {/* Fundo */}
-
       <div
         className="
           absolute
@@ -54,15 +77,11 @@ export default function IndoorMap({
         "
       />
 
-      {/* Planta da casa */}
-
       <svg
         className="absolute inset-0 w-full h-full"
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
       >
-
-        {/* Parede externa */}
 
         <rect
           x="3"
@@ -74,77 +93,43 @@ export default function IndoorMap({
           strokeWidth=".4"
         />
 
-        {/* Divisórias */}
-
         <line x1="35" y1="3" x2="35" y2="42" stroke="#00ffff" strokeWidth=".35"/>
-
         <line x1="68" y1="3" x2="68" y2="42" stroke="#00ffff" strokeWidth=".35"/>
-
         <line x1="3" y1="42" x2="97" y2="42" stroke="#00ffff" strokeWidth=".35"/>
-
         <line x1="28" y1="42" x2="28" y2="97" stroke="#00ffff" strokeWidth=".35"/>
-
         <line x1="72" y1="42" x2="72" y2="97" stroke="#00ffff" strokeWidth=".35"/>
 
       </svg>
 
-      {/* Nomes dos cômodos */}
+      {missoes.map((m) => {
 
-      <span className="absolute left-[10%] top-[12%] text-cyan-300 text-xs tracking-widest">
-        QUARTO
-      </span>
+        const pos = converter(m.localizacao);
 
-      <span className="absolute left-[42%] top-[12%] text-cyan-300 text-xs tracking-widest">
-        QUARTO
-      </span>
+        return (
 
-      <span className="absolute left-[76%] top-[12%] text-cyan-300 text-xs tracking-widest">
-        BANHO
-      </span>
+          <div
+            key={m.id}
+            className="
+              absolute
+              w-6
+              h-6
+              rounded-full
+              bg-yellow-400
+              border
+              border-yellow-200
+              animate-pulse
+              shadow-[0_0_20px_rgba(255,255,0,.9)]
+            "
+            style={{
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              transform: "translate(-50%,-50%)"
+            }}
+          />
 
-      <span className="absolute left-[38%] top-[47%] text-cyan-300 text-xs tracking-widest">
-        CORREDOR
-      </span>
+        );
 
-      <span className="absolute left-[8%] top-[73%] text-cyan-300 text-xs tracking-widest">
-        COZINHA
-      </span>
-
-      <span className="absolute left-[46%] top-[73%] text-cyan-300 text-xs tracking-widest">
-        SALA
-      </span>
-
-      <span className="absolute left-[79%] top-[73%] text-cyan-300 text-xs tracking-widest">
-        GARAGEM
-      </span>
-
-      {/* Missões */}
-
-      {missoes.map((m) => (
-
-        <div
-          key={m.id}
-          className="
-            absolute
-            w-6
-            h-6
-            rounded-full
-            bg-yellow-400
-            border
-            border-yellow-200
-            animate-pulse
-            shadow-[0_0_20px_rgba(255,255,0,.9)]
-          "
-          style={{
-            left: `${m.x}%`,
-            top: `${m.y}%`,
-            transform: "translate(-50%,-50%)"
-          }}
-        />
-
-      ))}
-
-      {/* Jogadores */}
+      })}
 
       {jogadores.map((j) => (
 
@@ -189,8 +174,6 @@ export default function IndoorMap({
 
       ))}
 
-      {/* Centro */}
-
       <div
         className="
           absolute
@@ -205,8 +188,6 @@ export default function IndoorMap({
           animate-ping
         "
       />
-
-      {/* Rodapé */}
 
       <div
         className="

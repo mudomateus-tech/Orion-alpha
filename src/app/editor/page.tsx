@@ -1,53 +1,95 @@
 "use client";
 
-import {
-useState
-} from "react";
 
 import {
-salvarCalibracao
-} from "@/services/calibrationService";
+  Suspense,
+  useState
+} from "react";
+
+
+import {
+  useSearchParams
+} from "next/navigation";
+
+
+import {
+  salvarMapa
+} from "@/services/mapService";
 
 
 
 interface Sala {
 
+
 id:string;
+
 
 nome:string;
 
+
 x:number;
+
 
 y:number;
 
+
 largura:number;
 
+
 altura:number;
+
 
 }
 
 
 
-export default function Editor(){
+
+
+
+function EditorContent(){
+
+
+
+const params = useSearchParams();
+
+
+
+const operacaoId = params.get("id");
+
+
+
 
 
 const [
+
 salas,
+
 setSalas
+
 ] = useState<Sala[]>([]);
 
 
 
+
+
 const [
+
 selecionada,
+
 setSelecionada
-] = useState<string|null>(null);
+
+] = useState<string | null>(null);
+
+
 
 
 
 const [
+
 nomeMapa,
+
 setNomeMapa
+
 ] = useState(
 
 "Casa Pequena"
@@ -56,100 +98,33 @@ setNomeMapa
 
 
 
-const [
-larguraMetros,
-setLarguraMetros
-] = useState(10);
-
 
 
 const [
-comprimentoMetros,
-setComprimentoMetros
-] = useState(8);
 
-
-
-const [
 arrastando,
+
 setArrastando
+
 ] = useState<string|null>(null);
 
 
 
+
+
 const [
+
 mensagem,
+
 setMensagem
+
 ] = useState("");
 
 
-
-async function salvarMapa(){
-
-
-try{
-
-
-await salvarCalibracao(
-
-"teste",
-
-{
-
-
-larguraMetros,
-
-comprimentoMetros,
-
-
-origem:{
-
-x:50,
-
-y:50
-
-},
-
-
-criadaEm:Date.now()
-
-
-}
-
-);
-
-
-
-setMensagem(
-
-"Mapa salvo no sistema ORION"
-
-);
-
-
-}
-
-
-catch(error){
-
-
-console.log(error);
-
-
-setMensagem(
-
-"Erro ao salvar mapa"
-
-);
-
-
-}
-
-
-
-}
 function criarSala(
+
 e:React.MouseEvent
+
 ){
 
 
@@ -162,41 +137,72 @@ return;
 
 
 const area =
+
 e.currentTarget.getBoundingClientRect();
 
 
 
 const x =
-((e.clientX-area.left)/area.width)*100;
+
+((e.clientX-area.left)
+
+/
+
+area.width)
+
+*
+
+100;
 
 
 
 const y =
-((e.clientY-area.top)/area.height)*100;
+
+((e.clientY-area.top)
+
+/
+
+area.height)
+
+*
+
+100;
 
 
 
 
-
-const nova:Sala={
-
-
-id:Date.now().toString(),
+const nova:Sala = {
 
 
-nome:"Novo cômodo",
+id:
+
+Date.now().toString(),
+
+
+
+nome:
+
+"Novo cômodo",
+
 
 
 x,
 
 
+
 y,
 
 
-largura:15,
+
+largura:
+
+15,
 
 
-altura:15
+
+altura:
+
+15
 
 
 };
@@ -206,7 +212,7 @@ altura:15
 
 setSalas(
 
-salas=>[
+salas => [
 
 ...salas,
 
@@ -275,36 +281,50 @@ return;
 
 
 
-
 const area =
+
 e.currentTarget.getBoundingClientRect();
 
 
 
 const x =
-((e.clientX-area.left)/area.width)*100;
+
+((e.clientX-area.left)
+
+/
+
+area.width)
+
+*
+
+100;
 
 
 
 const y =
-((e.clientY-area.top)/area.height)*100;
 
+((e.clientY-area.top)
 
+/
+
+area.height)
+
+*
+
+100;
 
 
 
 setSalas(
 
-salas=>
-
+salas =>
 
 salas.map(
 
-sala=>
+sala =>
 
 
-sala.id===arrastando
-
+sala.id === arrastando
 
 ?
 
@@ -318,9 +338,7 @@ y
 
 }
 
-
 :
-
 
 sala
 
@@ -353,23 +371,18 @@ return;
 
 
 
-
 setSalas(
 
-
-salas=>
-
+salas =>
 
 salas.map(
 
-sala=>
+sala =>
 
 
-sala.id===selecionada
-
+sala.id === selecionada
 
 ?
-
 
 {
 
@@ -379,9 +392,7 @@ nome:valor
 
 }
 
-
 :
-
 
 sala
 
@@ -391,14 +402,90 @@ sala
 );
 
 
+}
+
+
+
+
+
+
+
+
+async function salvar(){
+
+
+if(!operacaoId){
+
+
+setMensagem(
+
+"Operação não encontrada."
+
+);
+
+
+return;
+
 
 }
+
+
+
+await salvarMapa(
+
+operacaoId,
+
+{
+
+
+nome:
+
+nomeMapa,
+
+
+
+salas,
+
+
+
+criadoEm:
+
+Date.now()
+
+
+}
+
+);
+
+
+
+setMensagem(
+
+"Mapa salvo no ORION!"
+
+);
+
+
+
+}
+
+
 return (
 
-<main className="min-h-screen bg-[#05070d] text-white p-8">
+<main className="
+min-h-screen
+bg-[#05070d]
+text-white
+p-8
+">
 
 
-<div className="max-w-7xl mx-auto flex gap-8">
+<div className="
+max-w-7xl
+mx-auto
+flex
+gap-8
+">
 
 
 
@@ -458,135 +545,6 @@ p-3
 
 
 
-<div className="mt-6">
-
-
-<label className="text-cyan-300 text-sm">
-
-Largura da casa (metros)
-
-</label>
-
-
-<input
-
-type="number"
-
-value={larguraMetros}
-
-onChange={
-
-e=>setLarguraMetros(
-
-Number(e.target.value)
-
-)
-
-}
-
-className="
-w-full
-mt-2
-bg-zinc-900
-border
-border-cyan-400/30
-rounded-xl
-p-3
-"
-
-/>
-
-
-
-<label className="text-cyan-300 text-sm block mt-4">
-
-Comprimento da casa (metros)
-
-</label>
-
-
-
-<input
-
-type="number"
-
-value={comprimentoMetros}
-
-onChange={
-
-e=>setComprimentoMetros(
-
-Number(e.target.value)
-
-)
-
-}
-
-className="
-w-full
-mt-2
-bg-zinc-900
-border
-border-cyan-400/30
-rounded-xl
-p-3
-"
-
-/>
-
-
-
-<button
-
-onClick={salvarMapa}
-
-className="
-w-full
-mt-6
-bg-cyan-500
-text-black
-font-bold
-rounded-xl
-p-3
-hover:bg-cyan-300
-"
-
->
-
-SALVAR MAPA ORION
-
-</button>
-
-
-
-{
-
-mensagem &&
-
-<p className="
-text-cyan-300
-text-sm
-mt-4
-">
-
-{mensagem}
-
-</p>
-
-}
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
 {
 
 selecionada &&
@@ -595,7 +553,10 @@ selecionada &&
 <div className="mt-8">
 
 
-<h2 className="text-cyan-300 mb-2">
+<h2 className="
+text-cyan-300
+mb-2
+">
 
 Nome do cômodo
 
@@ -603,9 +564,7 @@ Nome do cômodo
 
 
 
-
 <input
-
 
 value={
 
@@ -618,15 +577,19 @@ s=>s.id===selecionada
 }
 
 
+
 onChange={
 
-e=>atualizarNome(
+e=>
+
+atualizarNome(
 
 e.target.value
 
 )
 
 }
+
 
 
 className="
@@ -641,11 +604,61 @@ p-3
 />
 
 
+
 </div>
 
 
 }
 
+
+
+
+
+
+
+<button
+
+onClick={salvar}
+
+className="
+mt-8
+w-full
+bg-cyan-400
+text-black
+font-bold
+rounded-xl
+p-3
+"
+
+>
+
+SALVAR MAPA
+
+</button>
+
+
+
+
+
+
+
+{
+
+mensagem &&
+
+
+<p className="
+text-cyan-300
+mt-4
+text-sm
+">
+
+{mensagem}
+
+</p>
+
+
+}
 
 
 
@@ -676,6 +689,7 @@ onMouseUp={
 }
 
 
+
 className="
 flex-1
 min-h-[700px]
@@ -687,7 +701,6 @@ overflow-hidden
 bg-[#071019]
 "
 
-
 >
 
 
@@ -697,12 +710,12 @@ bg-[#071019]
 className="
 absolute
 inset-0
-opacity-20
-bg-[linear-gradient(#00ffff_1px,transparent_1px),linear-gradient(90deg,#00ffff_1px,transparent_1px)]
+bg-[linear-gradient(#123_1px,transparent_1px),linear-gradient(90deg,#123_1px,transparent_1px)]
 bg-[size:40px_40px]
 "
 
 />
+
 
 
 
@@ -719,13 +732,15 @@ sala=>(
 
 <div
 
-
 key={sala.id}
+
 
 
 onMouseDown={
 
-e=>moverSala(
+e=>
+
+moverSala(
 
 e,
 
@@ -741,16 +756,13 @@ onClick={
 
 e=>{
 
-
 e.stopPropagation();
-
 
 setSelecionada(
 
 sala.id
 
 );
-
 
 }
 
@@ -776,18 +788,13 @@ cursor-move
 
 style={{
 
-
 left:`${sala.x}%`,
-
 
 top:`${sala.y}%`,
 
-
 width:`${sala.largura}%`,
 
-
 height:`${sala.altura}%`
-
 
 }}
 
@@ -799,19 +806,16 @@ height:`${sala.altura}%`
 {sala.nome}
 
 
-
 </div>
 
 
 )
 
+
 )
 
+
 }
-
-
-
-
 
 
 
@@ -824,8 +828,50 @@ height:`${sala.altura}%`
 </div>
 
 
+</main>
+
+
+);
+
+
+
+}
+
+
+
+
+export default function Editor(){
+
+
+return (
+
+<Suspense
+
+fallback={
+
+<main className="
+min-h-screen
+bg-black
+text-white
+flex
+items-center
+justify-center
+">
+
+Carregando editor...
 
 </main>
+
+}
+
+>
+
+
+<EditorContent/>
+
+
+</Suspense>
+
 
 );
 

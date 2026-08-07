@@ -32,9 +32,10 @@ import {
 } from "@/hooks/useVictory";
 
 
-
 import Header from "@/components/ui/Header";
+
 import Card from "@/components/ui/Card";
+
 import Button from "@/components/ui/Button";
 
 
@@ -75,7 +76,6 @@ import {
 } from "@/services/sabotageService";
 
 
-
 import {
   calcularDistancia
 } from "@/utils/distance";
@@ -110,6 +110,13 @@ import {
 
 
 
+import {
+  buscarMapa,
+  MapaCasa
+} from "@/services/mapService";
+
+
+
 
 function JogoContent(){
 
@@ -136,7 +143,6 @@ operacaoId
 
 
 
-
 const {
 
 jogador
@@ -148,7 +154,6 @@ operacaoId,
 jogadorId
 
 );
-
 
 
 
@@ -166,7 +171,6 @@ operacaoId
 
 
 
-
 useLocationTracker(
 
 operacaoId,
@@ -175,6 +179,25 @@ jogadorId
 
 );
 
+
+
+const [
+
+mapa,
+
+setMapa
+
+] = useState<MapaCasa | null>(null);
+
+
+
+const [
+
+calibracao,
+
+setCalibracao
+
+] = useState<CalibracaoCasa | null>(null);
 
 
 
@@ -188,7 +211,6 @@ setMensagem
 
 
 
-
 const [
 
 tarefaAtual,
@@ -199,7 +221,6 @@ setTarefaAtual
 
 
 
-
 const [
 
 modoFantasma,
@@ -207,18 +228,6 @@ modoFantasma,
 setModoFantasma
 
 ] = useState(false);
-
-
-
-
-const [
-
-calibracao,
-
-setCalibracao
-
-] = useState<CalibracaoCasa | null>(null);
-
 
 
 
@@ -238,7 +247,6 @@ y:50
 
 
 
-
 const [
 
 posicaoReal,
@@ -255,7 +263,6 @@ y:0
 
 
 
-
 const [
 
 jogadoresOnline,
@@ -266,10 +273,62 @@ setJogadoresOnline
 
 
 
-
 const jogadorMorto =
 
 jogador?.status === "morto";
+useEffect(()=>{
+
+
+async function carregarMapa(){
+
+
+if(!operacaoId){
+
+return;
+
+}
+
+
+
+const resultado =
+
+await buscarMapa(
+
+operacaoId
+
+);
+
+
+
+if(resultado){
+
+setMapa(
+
+resultado
+
+);
+
+}
+
+
+
+}
+
+
+
+carregarMapa();
+
+
+
+},[
+operacaoId
+]);
+
+
+
+
+
+
 
 useEffect(()=>{
 
@@ -285,7 +344,7 @@ return;
 
 
 
-const dados =
+const resultado =
 
 await buscarCalibracao(
 
@@ -295,11 +354,11 @@ operacaoId
 
 
 
-if(dados){
+if(resultado){
 
 setCalibracao(
 
-dados
+resultado
 
 );
 
@@ -351,6 +410,7 @@ operacaoId
 );
 
 
+
 }
 
 
@@ -369,7 +429,6 @@ operacao,
 operacaoId
 
 ]);
-
 
 
 
@@ -404,6 +463,7 @@ jogadores
 );
 
 
+
 }
 
 );
@@ -417,7 +477,6 @@ return ()=>cancelar();
 },[
 operacaoId
 ]);
-
 
 
 
@@ -478,7 +537,7 @@ if(calibracao){
 
 
 
-const destino =
+const novaPosicao =
 
 converterPosicaoRealParaMapa(
 
@@ -492,6 +551,7 @@ calibracao
 
 
 
+
 setPosicao((atualMapa)=>{
 
 
@@ -501,7 +561,7 @@ suavizarMovimento(
 
 atualMapa,
 
-destino
+novaPosicao
 
 );
 
@@ -553,13 +613,11 @@ return ()=>{
 pararSensorMovimento();
 
 
-
 };
 
 
 
 },[
-
 operacaoId,
 
 jogadorId,
@@ -579,6 +637,7 @@ async function abrirMissao(
 missao:any
 
 ){
+
 
 
 if(jogadorMorto){
@@ -621,7 +680,6 @@ return;
 
 
 
-
 const distancia =
 
 calcularDistancia(
@@ -655,7 +713,6 @@ Math.round(distancia)
 " metros."
 
 );
-
 
 
 return;
@@ -722,7 +779,6 @@ setTarefaAtual(null);
 
 
 }
-
 async function sabotar(){
 
 
@@ -765,6 +821,8 @@ resultado.titulo
 
 
 
+
+
 if(!jogador){
 
 
@@ -792,6 +850,8 @@ Carregando agente...
 
 
 
+
+
 return (
 
 <main className="
@@ -814,9 +874,12 @@ subtitulo="Operação em andamento"
 
 
 
+
+
 {
 
 finalizada &&
+
 
 <VictoryBanner
 
@@ -824,7 +887,10 @@ vencedor={vencedor}
 
 />
 
+
 }
+
+
 
 
 
@@ -838,6 +904,7 @@ jogador={jogador}
 operacao={operacao}
 
 />
+
 
 
 
@@ -858,31 +925,43 @@ operacao={operacao}
 
 
 
+
 <IndoorMap
 
 jogadores={
+
 
 jogadoresOnline.length
 
 ?
 
+
 jogadoresOnline
+
 
 :
 
+
 operacao?.jogadores?.map((j:any)=>({
+
 
 id:j.id,
 
+
 nome:j.nome,
+
 
 x:j.x ?? 50,
 
+
 y:j.y ?? 50,
+
 
 status:j.status
 
+
 })) || []
+
 
 }
 
@@ -898,9 +977,11 @@ operacao?.missoes || []
 
 salas={
 
-operacao?.mapa?.salas || []
+mapa?.salas || []
 
 }
+
+
 
 />
 
@@ -917,24 +998,26 @@ mt-3
 text-xs
 ">
 
+
 ORION POSITION ENGINE
+
 
 <br/>
 
-MAP:
+
+POSIÇÃO:
+
 
 {Math.round(posicao.x)}
-
-%
 
 /
 
 {Math.round(posicao.y)}
 
-%
 
 
 </div>
+
 
 
 
@@ -946,14 +1029,15 @@ MAP:
 
 jogadorMorto &&
 
+
 <GhostModeButton
 
 ativar={()=>setModoFantasma(true)}
 
 />
 
-}
 
+}
 
 
 
@@ -967,6 +1051,7 @@ modoFantasma &&
 
 jogadorMorto &&
 
+
 <GhostOverlay
 
 jogadores={
@@ -976,6 +1061,7 @@ operacao?.jogadores || []
 }
 
 />
+
 
 }
 
@@ -989,6 +1075,7 @@ operacao?.jogadores || []
 
 tarefaAtual &&
 
+
 <TaskEngine
 
 missao={tarefaAtual}
@@ -996,6 +1083,7 @@ missao={tarefaAtual}
 concluir={concluirTarefa}
 
 />
+
 
 }
 
@@ -1013,10 +1101,12 @@ concluir={concluirTarefa}
 !tarefaAtual &&
 
 
+
 <Card title="MISSÕES">
 
 
 {
+
 
 operacao?.missoes?.map(
 
@@ -1065,7 +1155,9 @@ EXECUTAR
 </Button>
 
 
+
 </div>
+
 
 
 )
@@ -1075,13 +1167,14 @@ EXECUTAR
 
 
 }
-
 
 
 </Card>
 
 
+
 }
+
 
 
 
@@ -1115,7 +1208,9 @@ SABOTAR SISTEMA
 </Card>
 
 
+
 }
+
 
 
 
@@ -1128,6 +1223,7 @@ SABOTAR SISTEMA
 jogador.papel === "infiltrado" &&
 
 !jogadorMorto &&
+
 
 
 <EliminationButton
@@ -1144,7 +1240,10 @@ operacao?.jogadores || []
 
 />
 
+
+
 }
+
 
 
 
@@ -1157,6 +1256,7 @@ operacao?.jogadores || []
 mensagem &&
 
 
+
 <p className="
 text-yellow-400
 text-center
@@ -1166,6 +1266,7 @@ mt-5
 {mensagem}
 
 </p>
+
 
 }
 
@@ -1177,6 +1278,7 @@ mt-5
 
 
 }
+
 
 
 
@@ -1214,7 +1316,7 @@ Carregando jogo...
 
 </Suspense>
 
-
 );
+
 
 }

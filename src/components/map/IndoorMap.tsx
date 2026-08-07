@@ -1,34 +1,26 @@
 "use client";
 
-
-
 interface PlayerPosition {
 
-  id:string;
+  id: string;
 
-  nome:string;
+  nome: string;
 
-  x:number;
+  x: number;
 
-  y:number;
+  y: number;
 
-  status?:string;
+  status?: string;
 
 }
-
-
 
 interface IndoorMapProps {
 
-  jogadores?:PlayerPosition[];
+  jogadores?: PlayerPosition[];
 
-  missoes?:any[];
+  missoes?: any[];
 
 }
-
-
-
-
 
 export default function IndoorMap({
 
@@ -36,9 +28,7 @@ export default function IndoorMap({
 
   missoes = []
 
-}:IndoorMapProps){
-
-
+}: IndoorMapProps) {
 
   return (
 
@@ -58,10 +48,6 @@ export default function IndoorMap({
 
     >
 
-
-
-      {/* GRID DA CASA */}
-
       <div
 
         className="
@@ -74,101 +60,62 @@ export default function IndoorMap({
 
       />
 
+      {missoes.map((missao: any) => (
 
+        <div
 
+          key={missao.id}
 
+          className="
+            absolute
+            w-6
+            h-6
+            rounded-full
+            bg-yellow-400
+            shadow-[0_0_20px_#ffff00]
+          "
 
+          style={{
 
-      {/* MISSÕES */}
+            left: `${missao.x}%`,
 
-      {
+            top: `${missao.y}%`
 
-        missoes.map((missao:any)=>(
+          }}
 
-          <div
+        />
 
-            key={missao.id}
+      ))}
 
-            className="
-              absolute
-              w-6
-              h-6
-              rounded-full
-              bg-yellow-400
-              shadow-[0_0_20px_#ffff00]
-            "
+      {jogadores.map((jogador) => (
 
-            style={{
+        <div
 
-              left:`${missao.x}%`,
+          key={jogador.id}
 
-              top:`${missao.y}%`
+          className={`
+            absolute
+            w-5
+            h-5
+            rounded-full
+            ${
+              jogador.status === "morto"
+                ? "bg-red-500 shadow-[0_0_20px_red]"
+                : "bg-cyan-400 shadow-[0_0_20px_cyan]"
+            }
+          `}
 
-            }}
+          style={{
 
-          />
+            left: `${jogador.x}%`,
 
+            top: `${jogador.y}%`
 
-        ))
+          }}
 
-      }
+        />
 
-
-
-
-
-
-
-
-      {/* JOGADORES */}
-
-      {
-
-        jogadores.map((jogador)=>(
-
-
-          <div
-
-            key={jogador.id}
-
-            className={`
-              absolute
-              w-5
-              h-5
-              rounded-full
-              ${
-                jogador.status === "morto"
-
-                ?
-
-                "bg-red-500 shadow-[0_0_20px_red]"
-
-                :
-
-                "bg-cyan-400 shadow-[0_0_20px_cyan]"
-
-              }
-            `}
-
-            style={{
-
-              left:`${jogador.x}%`,
-
-              top:`${jogador.y}%`
-
-            }}
-
-          />
-
-        ))
-
-      }
-
-
-
-
-
-
+      ))}
 
       <div
 
@@ -185,10 +132,7 @@ export default function IndoorMap({
 
         ORION // HOUSE MAP
 
-
       </div>
-
-
 
     </div>
 

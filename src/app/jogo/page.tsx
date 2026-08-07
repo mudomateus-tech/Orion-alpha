@@ -1,34 +1,36 @@
 "use client";
 
 import {
-Suspense,
-useEffect,
-useState
+  Suspense,
+  useEffect,
+  useState
 } from "react";
 
 import {
-useSearchParams
+  useSearchParams
 } from "next/navigation";
 
 import {
-useOperation
+  useOperation
 } from "@/hooks/useOperation";
 
 import {
-usePlayer
+  usePlayer
 } from "@/hooks/usePlayer";
 
 import {
-useLocationTracker
+  useLocationTracker
 } from "@/hooks/useLocationTracker";
 
 import {
-useVictory
+  useVictory
 } from "@/hooks/useVictory";
+
 
 import Header from "@/components/ui/Header";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+
 
 import IndoorMap from "@/components/map/IndoorMap";
 
@@ -46,979 +48,926 @@ import GhostOverlay from "@/components/game/GhostOverlay";
 
 import VictoryBanner from "@/components/victory/VictoryBanner";
 
+
 import {
-criarMissoes
+  criarMissoes
 } from "@/services/mission";
 
+
 import {
-concluirMissao
+  concluirMissao
 } from "@/services/actionService";
 
+
 import {
-executarSabotagem
+  executarSabotagem
 } from "@/services/sabotageService";
 
-import {
-calcularDistancia
-} from "@/utils/distance";
 
 import {
-atualizarPosicaoJogador,
-observarPosicoes
+  buscarCalibracao,
+  CalibracaoCasa
+} from "@/services/calibrationService";
+
+
+import {
+  atualizarPosicaoJogador,
+  observarPosicoes
 } from "@/services/positionService";
 
+
 import {
-iniciarSensorMovimento,
-pararSensorMovimento
+  iniciarSensorMovimento,
+  pararSensorMovimento
 } from "@/services/motionService";
+
+
+import {
+  calcularDistancia
+} from "@/utils/distance";
 
 
 
 function JogoContent(){
 
+  const params = useSearchParams();
 
-const params = useSearchParams();
 
+  const operacaoId =
+    params.get("id");
 
-const operacaoId = params.get("id");
 
+  const jogadorId =
+    params.get("jogador");
 
-const jogadorId = params.get("jogador");
 
 
+  const {
+    operacao
+  } = useOperation(
+    operacaoId
+  );
 
-const {
-operacao
-} = useOperation(
 
-operacaoId
 
-);
+  const {
+    jogador
+  } = usePlayer(
+    operacaoId,
+    jogadorId
+  );
 
 
 
-const {
-jogador
-} = usePlayer(
+  const {
+    finalizada,
+    vencedor
+  } = useVictory(
+    operacaoId
+  );
 
-operacaoId,
 
-jogadorId
 
-);
+  useLocationTracker(
+    operacaoId,
+    jogadorId
+  );
 
 
 
-const {
-finalizada,
-vencedor
-} = useVictory(
+  const [
+    mensagem,
+    setMensagem
+  ] = useState("");
 
-operacaoId
 
-);
 
+  const [
+    tarefaAtual,
+    setTarefaAtual
+  ] = useState<any>(null);
 
 
-useLocationTracker(
 
-operacaoId,
+  const [
+    modoFantasma,
+    setModoFantasma
+  ] = useState(false);
 
-jogadorId
 
-);
 
+  const [
+    posicao,
+    setPosicao
+  ] = useState({
 
+    x:50,
 
-const [
-mensagem,
-setMensagem
-] = useState("");
+    y:50
 
+  });
 
 
-const [
-tarefaAtual,
-setTarefaAtual
-] = useState<any>(null);
 
+  const [
+    jogadoresOnline,
+    setJogadoresOnline
+  ] = useState<any[]>([]);
 
 
-const [
-modoFantasma,
-setModoFantasma
-] = useState(false);
 
+  const [
+    calibracao,
+    setCalibracao
+  ] = useState<CalibracaoCasa | null>(null);
 
 
-const [
-posicao,
-setPosicao
-] = useState({
 
-x:50,
+  const jogadorMorto =
+    jogador?.status === "morto";
 
-y:50
 
-});
 
+  useEffect(()=>{
 
+    async function preparar(){
 
-const [
-jogadoresOnline,
-setJogadoresOnline
-] = useState<any[]>([]);
+      if(
+        operacaoId &&
+        operacao &&
+        (
+          !operacao.missoes ||
+          operacao.missoes.length === 0
+        )
+      ){
 
+        await criarMissoes(
+          operacaoId
+        );
 
+      }
 
-const jogadorMorto =
-jogador?.status === "morto";
-useEffect(()=>{
 
+      if(
+        operacaoId
+      ){
 
-async function preparar(){
+        const dados =
+          await buscarCalibracao(
+            operacaoId
+          );
 
 
-if(
+        setCalibracao(
+          dados
+        );
 
-operacaoId &&
+      }
 
-operacao &&
+    }
 
-(!operacao.missoes ||
 
-operacao.missoes.length === 0)
+    preparar();
 
-){
 
+  },[
+    operacao,
+    operacaoId
+  ]);
 
-await criarMissoes(
 
-operacaoId
 
-);
 
 
-}
+  useEffect(()=>{
 
+    if(!operacaoId){
 
+      return;
 
-}
+    }
 
 
-preparar();
 
+    const cancelar =
+      observarPosicoes(
 
+        operacaoId,
 
-},[
-operacao,
-operacaoId
-]);
+        (jogadores)=>{
 
+          setJogadoresOnline(
+            jogadores
+          );
 
+        }
 
+      );
 
 
 
+    return ()=>cancelar();
 
-useEffect(()=>{
 
 
-if(!operacaoId){
+  },[
+    operacaoId
+  ]);
 
-return;
 
-}
 
 
 
-const cancelar = observarPosicoes(
 
-operacaoId,
 
-(jogadores)=>{
+  useEffect(()=>{
 
 
-setJogadoresOnline(
+    if(
+      !operacaoId ||
+      !jogadorId
+    ){
 
-jogadores
+      return;
 
-);
+    }
 
 
 
-}
+    iniciarSensorMovimento(
 
+      (movimento)=>{
 
-);
 
+        setPosicao(
+          atual=>{
 
 
-return ()=>cancelar();
+            const nova = {
 
+              x:
+              Math.max(
+                0,
+                Math.min(
+                  100,
+                  atual.x + movimento.x
+                )
+              ),
 
 
-},[
-operacaoId
-]);
+              y:
+              Math.max(
+                0,
+                Math.min(
+                  100,
+                  atual.y + movimento.y
+                )
+              )
 
+            };
 
 
 
+            atualizarPosicaoJogador(
 
+              operacaoId,
 
+              jogadorId,
 
-useEffect(()=>{
+              nova.x,
 
+              nova.y
 
-if(
+            );
 
-!operacaoId ||
 
-!jogadorId
 
-){
+            return nova;
 
-return;
 
-}
+          }
 
+        );
 
 
+      }
 
-iniciarSensorMovimento(
+    );
 
-(movimento)=>{
 
 
-setPosicao((atual)=>{
+    return ()=>{
 
+      pararSensorMovimento();
 
-const nova = {
+    };
 
 
-x:Math.max(
 
-0,
+  },[
+    operacaoId,
+    jogadorId
+  ]);
 
-Math.min(
 
-100,
 
-atual.x + movimento.x
 
-)
 
-),
 
 
+  async function abrirMissao(
+    missao:any
+  ){
 
-y:Math.max(
 
-0,
+    if(jogadorMorto){
 
-Math.min(
+      setMensagem(
+        "Você está eliminado."
+      );
 
-100,
 
-atual.y + movimento.y
+      return;
 
-)
+    }
 
-)
 
 
-};
+    if(
+      !jogador?.localizacao ||
+      !missao?.localizacao
+    ){
 
+      setMensagem(
+        "Localização indisponível."
+      );
 
 
+      return;
 
+    }
 
-atualizarPosicaoJogador(
 
 
-operacaoId,
+    const distancia =
 
+      calcularDistancia(
 
-jogadorId,
+        jogador.localizacao.latitude,
 
+        jogador.localizacao.longitude,
 
-nova.x,
+        missao.localizacao.latitude,
 
+        missao.localizacao.longitude
 
-nova.y
+      );
 
 
 
-);
+    if(
+      distancia > 5
+    ){
 
+      setMensagem(
 
+        "Aproxime-se da missão. Distância: "
 
+        +
 
+        Math.round(distancia)
 
-return nova;
+        +
 
+        " metros."
 
+      );
 
-});
 
+      return;
 
+    }
 
-}
 
-);
 
+    setTarefaAtual(
+      missao
+    );
 
 
+  }
 
 
-return ()=>{
 
 
-pararSensorMovimento();
 
 
-};
+  async function concluirTarefa(){
 
 
+    if(
+      !operacaoId ||
+      !jogadorId ||
+      !tarefaAtual
+    ){
 
-},[
-operacaoId,
-jogadorId
-]);
+      return;
 
+    }
 
 
 
+    await concluirMissao(
 
+      operacaoId,
 
+      jogadorId,
 
+      tarefaAtual.id
 
+    );
 
-async function abrirMissao(
 
-missao:any
 
-){
+    setMensagem(
+      "Missão concluída!"
+    );
 
 
-if(jogadorMorto){
 
+    setTarefaAtual(null);
 
-setMensagem(
 
-"Você está eliminado."
+  }
 
-);
 
 
 
-return;
 
 
-}
+  async function sabotar(){
 
 
+    if(
+      !operacaoId ||
+      !jogadorId
+    ){
 
+      return;
 
+    }
 
-if(
 
-!jogador?.localizacao ||
 
-!missao?.localizacao
+    const resultado =
 
-){
+      await executarSabotagem(
 
+        operacaoId,
 
-setMensagem(
+        jogadorId
 
-"Localização indisponível."
+      );
 
-);
 
 
+    setMensagem(
+      resultado.titulo
+    );
 
-return;
 
+  }
 
-}
 
 
 
 
+  if(!jogador){
 
-const distancia =
+    return (
 
-calcularDistancia(
+      <main className="
+        min-h-screen
+        bg-black
+        text-white
+        flex
+        items-center
+        justify-center
+      ">
 
+        Carregando agente...
 
-jogador.localizacao.latitude,
+      </main>
 
+    );
 
-jogador.localizacao.longitude,
+  }
 
 
-missao.localizacao.latitude,
 
+  return (
 
-missao.localizacao.longitude
+    <main className="
+      min-h-screen
+      bg-black
+      text-white
+      p-6
+    ">
 
 
-);
+      <Header
 
+        titulo="ORION"
 
+        subtitulo="Operação em andamento"
 
+      />
 
 
 
-if(distancia > 5){
 
 
-setMensagem(
+      {
+        finalizada &&
 
-"Aproxime-se da missão. Distância: "
+        <VictoryBanner
 
-+
+          vencedor={vencedor}
 
-Math.round(distancia)
+        />
 
-+
+      }
 
-" metros."
 
-);
 
 
 
-return;
 
+      <GameHUD
 
-}
+        jogador={jogador}
 
+        operacao={operacao}
 
+      />
 
 
 
-setTarefaAtual(
 
-missao
 
-);
 
+      <RoleHUD
 
+        jogador={jogador}
 
-}
+        operacao={operacao}
 
+      />
 
 
 
 
 
 
-async function concluirTarefa(){
 
 
-if(
 
-!operacaoId ||
+      <IndoorMap
 
-!jogadorId ||
 
-!tarefaAtual
+        jogadores={
 
-){
+          jogadoresOnline.length
 
-return;
+          ?
 
-}
+          jogadoresOnline
 
+          :
 
+          operacao?.jogadores?.map(
 
+            (j:any)=>({
 
+              id:j.id,
 
-await concluirMissao(
+              nome:j.nome,
 
+              x:j.x ?? 50,
 
-operacaoId,
+              y:j.y ?? 50,
 
+              status:j.status
 
-jogadorId,
+            })
 
+          )
 
-tarefaAtual.id
+          ||
 
+          []
 
-);
+        }
 
 
 
+        missoes={
 
+          operacao?.missoes || []
 
-setMensagem(
+        }
 
-"Missão concluída!"
 
-);
 
+        calibracao={calibracao}
 
 
-setTarefaAtual(null);
+      />
 
 
 
-}
 
 
+      <div className="
+        text-center
+        text-cyan-300
+        mt-3
+      ">
 
+        POSIÇÃO:
 
+        {" "}
 
+        {Math.round(posicao.x)}
 
-async function sabotar(){
+        /
 
+        {Math.round(posicao.y)}
 
-if(
+      </div>
 
-!operacaoId ||
 
-!jogadorId
 
-){
 
-return;
 
-}
 
 
 
+      {
 
+        jogadorMorto &&
 
-const resultado =
 
-await executarSabotagem(
+        <GhostModeButton
 
-operacaoId,
+          ativar={
 
-jogadorId
+            ()=>setModoFantasma(true)
 
-);
+          }
 
+        />
 
+      }
 
 
 
-setMensagem(
 
-resultado.titulo
 
-);
 
 
 
-}
-if(!jogador){
 
-return (
+      {
 
-<main className="
-min-h-screen
-bg-black
-text-white
-flex
-items-center
-justify-center
-">
+        modoFantasma &&
 
-Carregando agente...
+        jogadorMorto &&
 
-</main>
 
-);
+        <GhostOverlay
 
-}
+          jogadores={
 
+            operacao?.jogadores || []
 
+          }
 
+        />
 
+      }
 
-return (
 
-<main className="
-min-h-screen
-bg-black
-text-white
-p-6
-">
 
 
-<Header
 
-titulo="ORION"
 
-subtitulo="Operação em andamento"
 
-/>
 
 
+      {
 
+        tarefaAtual &&
 
 
-{
+        <TaskEngine
 
-finalizada &&
+          missao={tarefaAtual}
 
-<VictoryBanner
+          concluir={concluirTarefa}
 
-vencedor={vencedor}
+        />
 
-/>
+      }
 
-}
 
 
 
 
 
-<GameHUD
 
-jogador={jogador}
 
-operacao={operacao}
 
-/>
+      {
 
+        !jogadorMorto &&
 
+        !tarefaAtual &&
 
 
+        <Card title="MISSÕES">
 
-<RoleHUD
 
-jogador={jogador}
+          {
 
-operacao={operacao}
+            operacao?.missoes?.map(
 
-/>
+              (missao:any)=>(
 
 
+                <div
 
+                  key={missao.id}
 
+                  className="
+                    bg-zinc-800
+                    p-4
+                    rounded-xl
+                    mb-3
+                  "
 
+                >
 
 
-<IndoorMap
+                  <h2>
 
+                    🎯 {missao.titulo}
 
-jogadores={
+                  </h2>
 
-jogadoresOnline.length
 
-?
 
-jogadoresOnline
+                  <p>
 
-:
+                    {missao.descricao}
 
-operacao?.jogadores?.map((j:any)=>({
+                  </p>
 
-id:j.id,
 
-nome:j.nome,
 
-x:j.x ?? 50,
+                  <Button
 
-y:j.y ?? 50,
+                    onClick={
 
-status:j.status
+                      ()=>abrirMissao(missao)
 
-})) || []
+                    }
 
-}
+                  >
 
+                    EXECUTAR
 
+                  </Button>
 
-missoes={
 
-operacao?.missoes || []
 
-}
+                </div>
 
 
-/>
+              )
 
+            )
 
+          }
 
 
+        </Card>
 
 
+      }
 
 
-<div className="
-mt-4
-text-center
-text-cyan-300
-text-xs
-tracking-widest
-">
 
-POSIÇÃO:
 
-{Math.round(posicao.x)}
 
-/
 
-{Math.round(posicao.y)}
 
-</div>
 
 
+      {
 
+        jogador.papel === "infiltrado" &&
 
+        !jogadorMorto &&
 
 
+        <Card title="SABOTAGEM">
 
-{
 
-jogadorMorto &&
+          <Button
 
-<GhostModeButton
+            variant="danger"
 
-ativar={()=>setModoFantasma(true)}
+            onClick={sabotar}
 
-/>
+          >
 
-}
+            SABOTAR SISTEMA
 
 
+          </Button>
 
 
+        </Card>
 
 
+      }
 
 
-{
 
-modoFantasma &&
 
-jogadorMorto &&
 
 
-<GhostOverlay
 
-jogadores={
 
-operacao?.jogadores || []
 
-}
+      {
 
-/>
+        jogador.papel === "infiltrado" &&
 
-}
+        !jogadorMorto &&
 
 
+        <EliminationButton
 
+          operacaoId={operacaoId}
 
+          jogadorId={jogadorId}
 
+          jogadores={
 
+            operacao?.jogadores || []
 
+          }
 
-{
+        />
 
-tarefaAtual &&
 
+      }
 
-<TaskEngine
 
-missao={tarefaAtual}
 
-concluir={concluirTarefa}
 
-/>
 
-}
 
 
 
 
+      {
 
+        mensagem &&
 
 
+        <p className="
+          text-yellow-400
+          text-center
+          mt-5
+        ">
 
+          {mensagem}
 
-{
+        </p>
 
-!jogadorMorto &&
 
-!tarefaAtual &&
+      }
 
 
-<Card title="MISSÕES">
 
 
-{
 
-operacao?.missoes?.map(
+    </main>
 
-(missao:any)=>(
-
-
-<div
-
-key={missao.id}
-
-className="
-bg-zinc-800
-p-4
-rounded-xl
-mb-3
-"
-
->
-
-
-<h2>
-
-🎯 {missao.titulo}
-
-</h2>
-
-
-
-<p>
-
-{missao.descricao}
-
-</p>
-
-
-
-<Button
-
-onClick={()=>abrirMissao(missao)}
-
->
-
-EXECUTAR
-
-</Button>
-
-
-
-</div>
-
-
-)
-
-)
-
-}
-
-
-
-</Card>
-
-
-}
-
-
-
-
-
-
-
-{
-
-jogador.papel === "infiltrado" &&
-
-!jogadorMorto &&
-
-
-<Card title="SABOTAGEM">
-
-
-<Button
-
-variant="danger"
-
-onClick={sabotar}
-
->
-
-SABOTAR SISTEMA
-
-</Button>
-
-
-</Card>
-
-
-}
-
-
-
-
-
-
-
-{
-
-jogador.papel === "infiltrado" &&
-
-!jogadorMorto &&
-
-
-<EliminationButton
-
-
-operacaoId={operacaoId}
-
-
-jogadorId={jogadorId}
-
-
-jogadores={
-
-operacao?.jogadores || []
-
-}
-
-
-/>
-
-
-}
-
-
-
-
-
-
-
-
-{
-
-mensagem &&
-
-
-<p className="
-text-yellow-400
-text-center
-mt-5
-">
-
-{mensagem}
-
-</p>
-
-
-}
-
-
-
-
-</main>
-
-);
-
+  );
 
 }
 
@@ -1029,36 +978,34 @@ mt-5
 export default function Jogo(){
 
 
-return (
+  return (
 
-<Suspense
+    <Suspense
 
-fallback={
+      fallback={
 
-<main className="
-min-h-screen
-bg-black
-text-white
-flex
-items-center
-justify-center
-">
+        <main className="
+          min-h-screen
+          bg-black
+          text-white
+          flex
+          items-center
+          justify-center
+        ">
 
-Carregando jogo...
+          Carregando jogo...
 
-</main>
+        </main>
 
-}
+      }
 
->
+    >
 
+      <JogoContent/>
 
-<JogoContent/>
+    </Suspense>
 
-
-</Suspense>
-
-);
+  );
 
 
-}
+}  

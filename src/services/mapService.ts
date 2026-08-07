@@ -1,97 +1,77 @@
 import {
-  collection,
   doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  deleteDoc
+  getDoc
 } from "firebase/firestore";
 
-import { db } from "@/lib/firebase";
+import {
+  db
+} from "@/lib/firebase";
 
-import { Mapa } from "@/types/Map";
 
-const COLLECTION = "mapas";
+export interface SalaMapa {
 
-export async function criarMapa(mapa: Mapa) {
+  id:string;
 
-  await setDoc(
+  nome:string;
 
-    doc(db, COLLECTION, mapa.id),
+  x:number;
 
-    mapa
+  y:number;
 
-  );
+  largura:number;
+
+  altura:number;
 
 }
 
+
+export interface MapaORION {
+
+  nome:string;
+
+  salas:SalaMapa[];
+
+  criadoEm:number;
+
+}
+
+
+
 export async function buscarMapa(
 
-  mapaId: string
+  operacaoId:string
 
-): Promise<Mapa | null> {
+){
 
-  const snapshot = await getDoc(
+  const referencia = doc(
 
-    doc(db, COLLECTION, mapaId)
+    db,
+
+    "operacoes",
+
+    operacaoId,
+
+    "config",
+
+    "mapa"
 
   );
 
-  if (!snapshot.exists()) {
+
+  const resultado = await getDoc(
+
+    referencia
+
+  );
+
+
+  if(!resultado.exists()){
 
     return null;
 
   }
 
-  return snapshot.data() as Mapa;
 
-}
-
-export async function listarMapas(): Promise<Mapa[]> {
-
-  const snapshot = await getDocs(
-
-    collection(db, COLLECTION)
-
-  );
-
-  return snapshot.docs.map(
-
-    doc => doc.data() as Mapa
-
-  );
-
-}
-
-export async function salvarMapa(
-
-  mapaId: string,
-
-  dados: Partial<Mapa>
-
-) {
-
-  await updateDoc(
-
-    doc(db, COLLECTION, mapaId),
-
-    dados
-
-  );
-
-}
-
-export async function removerMapa(
-
-  mapaId: string
-
-) {
-
-  await deleteDoc(
-
-    doc(db, COLLECTION, mapaId)
-
-  );
+  return resultado.data() as MapaORION;
 
 }

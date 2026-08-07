@@ -19,6 +19,10 @@ usePlayer
 } from "@/hooks/usePlayer";
 
 import {
+useLocationTracker
+} from "@/hooks/useLocationTracker";
+
+import {
 useVictory
 } from "@/hooks/useVictory";
 
@@ -27,8 +31,6 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 
 import IndoorMap from "@/components/map/IndoorMap";
-
-import MovementController from "@/components/game/MovementController";
 
 import EliminationButton from "@/components/game/EliminationButton";
 
@@ -55,6 +57,15 @@ concluirMissao
 import {
 executarSabotagem
 } from "@/services/sabotageService";
+
+import {
+calcularDistancia
+} from "@/utils/distance";
+
+import {
+atualizarPosicaoJogador,
+observarPosicoes
+} from "@/services/positionService";
 
 
 
@@ -87,6 +98,13 @@ const {
 finalizada,
 vencedor
 } = useVictory(operacaoId);
+
+
+
+useLocationTracker(
+operacaoId,
+jogadorId
+);
 
 
 
@@ -124,26 +142,47 @@ y:50
 
 
 
+const [
+jogadoresOnline,
+setJogadoresOnline
+] = useState<any[]>([]);
+
+
+
+const jogadorMorto =
+jogador?.status === "morto";
 useEffect(()=>{
 
 async function preparar(){
 
+
 if(
+
 operacaoId &&
+
 operacao &&
+
 (!operacao.missoes ||
+
 operacao.missoes.length === 0)
+
 ){
 
 await criarMissoes(
+
 operacaoId
+
 );
 
-}
 
 }
+
+
+}
+
 
 preparar();
+
 
 },[
 operacao,
@@ -154,42 +193,272 @@ operacaoId
 
 
 
-function moverJogador(
-dx:number,
-dy:number
-){
+useEffect(()=>{
 
-setPosicao((atual)=>({
 
-x:Math.max(
-0,
-Math.min(
-100,
-atual.x + dx
-)
-),
+if(!operacaoId){
 
-y:Math.max(
-0,
-Math.min(
-100,
-atual.y + dy
-)
-)
-
-}));
+return;
 
 }
+
+
+
+const cancelar = observarPosicoes(
+
+operacaoId,
+
+(jogadores)=>{
+
+
+setJogadoresOnline(
+
+jogadores
+
+);
+
+
+}
+
+);
+
+
+
+return ()=>cancelar();
+
+
+
+},[
+operacaoId
+]);
+
+
+
+
+
+function moverJogador(
+
+dx:number,
+
+dy:number
+
+){
+
+
+setPosicao((atual)=>{
+
+
+const novaPosicao = {
+
+
+x:Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+atual.x + dx
+
+)
+
+),
+
+
+
+y:Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+atual.y + dy
+
+)
+
+)
+
+
+};
+
+
+
+
+if(
+
+operacaoId &&
+
+jogadorId
+
+){
+
+
+atualizarPosicaoJogador(
+
+
+operacaoId,
+
+
+jogadorId,
+
+
+novaPosicao.x,
+
+
+novaPosicao.y
+
+
+);
+
+
+}
+
+
+
+
+return novaPosicao;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+async function abrirMissao(
+
+missao:any
+
+){
+
+
+if(jogadorMorto){
+
+
+setMensagem(
+
+"Você está eliminado."
+
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+if(
+
+!jogador?.localizacao ||
+
+!missao?.localizacao
+
+){
+
+
+setMensagem(
+
+"Localização indisponível."
+
+);
+
+
+return;
+
+
+}
+
+
+
+
+const distancia =
+
+calcularDistancia(
+
+
+jogador.localizacao.latitude,
+
+
+jogador.localizacao.longitude,
+
+
+missao.localizacao.latitude,
+
+
+missao.localizacao.longitude
+
+
+);
+
+
+
+
+
+if(distancia > 5){
+
+
+setMensagem(
+
+
+"Aproxime-se da missão. Distância: "
+
++
+
+Math.round(distancia)
+
++
+
+" metros."
+
+
+
+);
+
+
+return;
+
+
+}
+
+
+
+
+setTarefaAtual(missao);
+
+
+
+}
+
+
 
 
 
 
 async function concluirTarefa(){
 
+
 if(
+
 !operacaoId ||
+
 !jogadorId ||
+
 !tarefaAtual
+
 ){
 
 return;
@@ -197,34 +466,56 @@ return;
 }
 
 
+
+
+
 await concluirMissao(
+
 
 operacaoId,
 
+
 jogadorId,
+
 
 tarefaAtual.id
 
+
 );
+
+
+
 
 
 setMensagem(
+
 "Missão concluída!"
+
 );
+
+
+
 
 
 setTarefaAtual(null);
 
+
+
 }
+
 
 
 
 
 async function sabotar(){
 
+
 if(
+
 !operacaoId ||
+
 !jogadorId
+
 ){
 
 return;
@@ -232,26 +523,34 @@ return;
 }
 
 
+
+
 const resultado =
+
 await executarSabotagem(
+
 
 operacaoId,
 
+
 jogadorId
 
+
 );
+
+
+
 
 
 setMensagem(
+
 resultado.titulo
+
 );
 
+
+
 }
-
-
-
-
-
 if(!jogador){
 
 return (
@@ -275,20 +574,6 @@ Carregando agente...
 
 
 
-const jogadorMapa = {
-
-id:jogador.id,
-
-nome:jogador.nome,
-
-x:posicao.x,
-
-y:posicao.y,
-
-status:jogador.status
-
-};
-
 
 
 return (
@@ -298,8 +583,8 @@ min-h-screen
 bg-black
 text-white
 p-6
-pb-40
 ">
+
 
 
 <Header
@@ -312,7 +597,10 @@ subtitulo="Operação em andamento"
 
 
 
+
+
 {
+
 finalizada &&
 
 <VictoryBanner
@@ -326,6 +614,7 @@ vencedor={vencedor}
 
 
 
+
 <GameHUD
 
 jogador={jogador}
@@ -333,6 +622,8 @@ jogador={jogador}
 operacao={operacao}
 
 />
+
+
 
 
 
@@ -348,20 +639,22 @@ operacao={operacao}
 
 
 
+
+
 <IndoorMap
 
 
-jogadores={[
+jogadores={
 
-jogadorMapa,
+jogadoresOnline.length
 
-...(operacao?.jogadores || [])
+?
 
-.filter(
-(j:any)=>
-j.id !== jogador.id
-)
-.map((j:any)=>({
+jogadoresOnline
+
+:
+
+operacao?.jogadores?.map((j:any)=>({
 
 id:j.id,
 
@@ -373,9 +666,9 @@ y:j.y ?? 50,
 
 status:j.status
 
-}))
+})) || []
 
-]}
+}
 
 
 missoes={
@@ -391,23 +684,97 @@ operacao?.missoes || []
 
 
 
-<MovementController
 
-onMove={moverJogador}
 
-/>
+
+<div className="mt-5 flex gap-3 justify-center">
+
+
+<Button
+
+onClick={()=>moverJogador(0,-5)}
+
+>
+
+⬆️
+
+</Button>
+
+
+<Button
+
+onClick={()=>moverJogador(0,5)}
+
+>
+
+⬇️
+
+</Button>
+
+
+<Button
+
+onClick={()=>moverJogador(-5,0)}
+
+>
+
+⬅️
+
+</Button>
+
+
+<Button
+
+onClick={()=>moverJogador(5,0)}
+
+>
+
+➡️
+
+</Button>
+
+
+</div>
+
+
+
 
 
 
 
 
 {
+
+jogadorMorto &&
+
+<GhostModeButton
+
+ativar={()=>setModoFantasma(true)}
+
+/>
+
+}
+
+
+
+
+
+
+
+
+{
+
 modoFantasma &&
+
+jogadorMorto &&
+
 
 <GhostOverlay
 
 jogadores={
+
 operacao?.jogadores || []
+
 }
 
 />
@@ -418,8 +785,13 @@ operacao?.jogadores || []
 
 
 
+
+
+
 {
+
 tarefaAtual &&
+
 
 <TaskEngine
 
@@ -433,6 +805,17 @@ concluir={concluirTarefa}
 
 
 
+
+
+
+
+
+
+{
+
+!jogadorMorto &&
+
+!tarefaAtual &&
 
 
 <Card title="MISSÕES">
@@ -458,6 +841,7 @@ mb-3
 
 >
 
+
 <h2>
 
 🎯 {missao.titulo}
@@ -475,7 +859,7 @@ mb-3
 
 <Button
 
-onClick={()=>setTarefaAtual(missao)}
+onClick={()=>abrirMissao(missao)}
 
 >
 
@@ -497,11 +881,20 @@ EXECUTAR
 </Card>
 
 
+}
+
+
+
+
+
 
 
 
 {
+
 jogador.papel === "infiltrado" &&
+
+!jogadorMorto &&
 
 
 <Card title="SABOTAGEM">
@@ -529,23 +922,40 @@ SABOTAR SISTEMA
 
 
 
+
+
+
+
 {
+
 jogador.papel === "infiltrado" &&
+
+!jogadorMorto &&
 
 
 <EliminationButton
 
+
 operacaoId={operacaoId}
+
 
 jogadorId={jogadorId}
 
+
 jogadores={
+
 operacao?.jogadores || []
+
 }
+
 
 />
 
+
 }
+
+
+
 
 
 
@@ -569,20 +979,25 @@ mt-5
 }
 
 
+
 </main>
 
 );
+
 
 }
 
 
 
 
+
 export default function Jogo(){
+
 
 return (
 
 <Suspense
+
 
 fallback={
 
@@ -601,12 +1016,16 @@ Carregando jogo...
 
 }
 
+
 >
 
+
 <JogoContent/>
+
 
 </Suspense>
 
 );
+
 
 }

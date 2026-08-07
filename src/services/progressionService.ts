@@ -4,6 +4,11 @@ import {
   buscarPerfilAgente
 } from "@/services/profileService";
 
+import {
+  verificarConquistas
+} from "@/services/achievementService";
+
+
 
 export async function registrarEventoProgressao(
 
@@ -18,10 +23,15 @@ export async function registrarEventoProgressao(
 
 ){
 
+
   const perfil =
+
     await buscarPerfilAgente(
+
       jogadorId
+
     );
+
 
 
   if(!perfil){
@@ -31,26 +41,39 @@ export async function registrarEventoProgressao(
   }
 
 
+
   let xp = 0;
 
+
+
   const atualizacao:any = {};
+
+
 
 
 
   switch(evento){
 
 
+
     case "vitoria":
 
       xp = 100;
 
+
       atualizacao.vitorias =
+
         perfil.vitorias + 1;
 
+
       atualizacao.operacoes =
+
         perfil.operacoes + 1;
 
+
       break;
+
+
 
 
 
@@ -58,13 +81,20 @@ export async function registrarEventoProgressao(
 
       xp = 40;
 
+
       atualizacao.derrotas =
+
         perfil.derrotas + 1;
 
+
       atualizacao.operacoes =
+
         perfil.operacoes + 1;
 
+
       break;
+
+
 
 
 
@@ -72,10 +102,15 @@ export async function registrarEventoProgressao(
 
       xp = 25;
 
+
       atualizacao.missoesConcluidas =
+
         perfil.missoesConcluidas + 1;
 
+
       break;
+
+
 
 
 
@@ -83,10 +118,15 @@ export async function registrarEventoProgressao(
 
       xp = 50;
 
+
       atualizacao.eliminacoes =
+
         perfil.eliminacoes + 1;
 
+
       break;
+
+
 
 
 
@@ -94,13 +134,19 @@ export async function registrarEventoProgressao(
 
       xp = 35;
 
+
       atualizacao.sabotagens =
-        perfil.sabotagens + 1;
+
+        (perfil.sabotagens ?? 0) + 1;
+
 
       break;
 
 
+
   }
+
+
 
 
 
@@ -114,11 +160,23 @@ export async function registrarEventoProgressao(
 
 
 
+
+
   await adicionarXP(
 
     jogadorId,
 
     xp
+
+  );
+
+
+
+
+
+  await verificarConquistas(
+
+    jogadorId
 
   );
 

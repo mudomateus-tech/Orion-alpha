@@ -4,12 +4,17 @@ import {
   updateDoc
 } from "firebase/firestore";
 
-import { db } from "@/lib/firebase";
+import {
+  db
+} from "@/lib/firebase";
 
 import {
   criarEvento
 } from "@/services/eventService";
 
+import {
+  registrarEventoProgressao
+} from "@/services/progressionService";
 
 
 
@@ -34,8 +39,6 @@ const tiposSabotagem = [
 
 
 
-
-
 function escolherSabotagem(){
 
   const sorteio =
@@ -52,9 +55,6 @@ function escolherSabotagem(){
   return tiposSabotagem[sorteio];
 
 }
-
-
-
 
 
 
@@ -84,10 +84,6 @@ export async function executarSabotagem(
 
 
 
-
-
-
-
   const snapshot =
 
     await getDoc(
@@ -95,10 +91,6 @@ export async function executarSabotagem(
       referencia
 
     );
-
-
-
-
 
 
 
@@ -118,15 +110,9 @@ export async function executarSabotagem(
 
 
 
-
-
-
-
   const dados:any =
 
     snapshot.data();
-
-
 
 
 
@@ -146,13 +132,7 @@ export async function executarSabotagem(
 
 
 
-
-
-  if(
-
-    !jogador
-
-  ){
+  if(!jogador){
 
     throw new Error(
 
@@ -161,8 +141,6 @@ export async function executarSabotagem(
     );
 
   }
-
-
 
 
 
@@ -186,8 +164,6 @@ export async function executarSabotagem(
 
 
 
-
-
   if(
 
     dados.sabotagem?.ativa
@@ -206,13 +182,9 @@ export async function executarSabotagem(
 
 
 
-
-
   const sabotagemEscolhida =
 
     escolherSabotagem();
-
-
 
 
 
@@ -247,11 +219,7 @@ export async function executarSabotagem(
       "em andamento"
 
 
-
   };
-
-
-
 
 
 
@@ -283,16 +251,12 @@ export async function executarSabotagem(
           Date.now()
 
 
-
       }
 
 
     }
 
   );
-
-
-
 
 
 
@@ -336,11 +300,21 @@ export async function executarSabotagem(
 
 
 
+  // PROGRESSÃO DO INFILTRADO
+
+  await registrarEventoProgressao(
+
+    jogadorId,
+
+    "sabotagem"
+
+  );
+
+
 
 
 
   return {
-
 
     titulo:
 
@@ -350,8 +324,6 @@ export async function executarSabotagem(
     tipo:
 
       sabotagem.tipo
-
-
 
   };
 

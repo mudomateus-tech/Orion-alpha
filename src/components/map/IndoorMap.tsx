@@ -4,22 +4,18 @@ import {
   Localizacao
 } from "@/types/Player";
 
-import {
-  CalibracaoCasa
-} from "@/services/calibrationService";
-
 
 interface PlayerPosition {
 
-  id: string;
+  id:string;
 
-  nome: string;
+  nome:string;
 
-  x: number;
+  x:number;
 
-  y: number;
+  y:number;
 
-  status?: string;
+  status?:string;
 
 }
 
@@ -27,11 +23,29 @@ interface PlayerPosition {
 
 interface Mission {
 
-  id: string;
+  id:string;
 
-  titulo?: string;
+  titulo?:string;
 
-  localizacao?: Localizacao;
+  localizacao?:Localizacao;
+
+}
+
+
+
+interface SalaMapa {
+
+  id:string;
+
+  nome:string;
+
+  x:number;
+
+  y:number;
+
+  largura:number;
+
+  altura:number;
 
 }
 
@@ -39,13 +53,15 @@ interface Mission {
 
 interface IndoorMapProps {
 
-  jogadores?: PlayerPosition[];
+  jogadores?:PlayerPosition[];
 
-  missoes?: Mission[];
+  missoes?:Mission[];
 
-  calibracao?: CalibracaoCasa | null;
+  salas?:SalaMapa[];
 
 }
+
+
 
 
 
@@ -55,18 +71,17 @@ export default function IndoorMap({
 
   missoes = [],
 
-  calibracao = null
+  salas = []
 
-}: IndoorMapProps) {
+}:IndoorMapProps){
 
 
 
 function converter(
 
-  localizacao?: Localizacao
+  localizacao?:Localizacao
 
-) {
-
+){
 
 
   if(!localizacao){
@@ -83,85 +98,17 @@ function converter(
 
 
 
-  if(calibracao){
-
-
-    const x =
-
-      (
-
-        localizacao.longitude /
-
-        calibracao.larguraMetros
-
-      )
-
-      *
-
-      100;
-
-
-
-    const y =
-
-      (
-
-        localizacao.latitude /
-
-        calibracao.comprimentoMetros
-
-      )
-
-      *
-
-      100;
-
-
-
-    return {
-
-      x,
-
-      y
-
-    };
-
-
-  }
-
-
-
   return {
 
-    x:
+    x:50 + (localizacao.longitude * 100),
 
-      50 +
-
-      (
-
-        localizacao.longitude *
-
-        100
-
-      ),
-
-
-    y:
-
-      50 -
-
-      (
-
-        localizacao.latitude *
-
-        100
-
-      )
+    y:50 - (localizacao.latitude * 100)
 
   };
 
 
 }
+
 
 
 
@@ -184,7 +131,6 @@ shadow-[0_0_50px_rgba(0,255,255,.18)]
 >
 
 
-
 <div
 
 className="
@@ -197,56 +143,70 @@ bg-[radial-gradient(circle_at_center,rgba(0,255,255,.05),transparent_70%)]
 
 
 
-<svg
 
-className="absolute inset-0 w-full h-full"
 
-viewBox="0 0 100 100"
+{/* SALAS DO EDITOR */}
 
-preserveAspectRatio="none"
+
+{
+
+salas.map((sala)=>(
+
+
+<div
+
+key={sala.id}
+
+className="
+absolute
+border
+border-cyan-400/50
+bg-cyan-400/10
+rounded-xl
+flex
+items-center
+justify-center
+text-[10px]
+text-cyan-200
+tracking-widest
+"
+
+style={{
+
+left:`${sala.x}%`,
+
+top:`${sala.y}%`,
+
+width:`${sala.largura}%`,
+
+height:`${sala.altura}%`
+
+}}
 
 >
 
 
+{sala.nome}
 
-<rect
 
-x="3"
+</div>
 
-y="3"
 
-width="94"
+))
 
-height="94"
 
-fill="none"
-
-stroke="#00ffff"
-
-strokeWidth=".4"
-
-/>
+}
 
 
 
-<line x1="35" y1="3" x2="35" y2="42" stroke="#00ffff" strokeWidth=".35"/>
-
-<line x1="68" y1="3" x2="68" y2="42" stroke="#00ffff" strokeWidth=".35"/>
-
-<line x1="3" y1="42" x2="97" y2="42" stroke="#00ffff" strokeWidth=".35"/>
-
-<line x1="28" y1="42" x2="28" y2="97" stroke="#00ffff" strokeWidth=".35"/>
-
-<line x1="72" y1="42" x2="72" y2="97" stroke="#00ffff" strokeWidth=".35"/>
-
-
-</svg>
 
 
 
+{/* MISSÕES */}
 
 
 {
+
 missoes.map((m)=>(
 
 
@@ -270,9 +230,11 @@ style={
 
 (()=>{
 
-const pos =
-converter(
+
+const pos = converter(
+
 m.localizacao
+
 );
 
 
@@ -286,6 +248,7 @@ transform:"translate(-50%,-50%)"
 
 };
 
+
 })()
 
 }
@@ -295,6 +258,7 @@ transform:"translate(-50%,-50%)"
 
 ))
 
+
 }
 
 
@@ -302,27 +266,32 @@ transform:"translate(-50%,-50%)"
 
 
 
+{/* JOGADORES */}
+
+
 {
-jogadores.map((j)=>(
+
+jogadores.map((jogador)=>(
 
 
 <div
 
-key={j.id}
+key={jogador.id}
 
 className="absolute"
 
 style={{
 
-left:`${j.x}%`,
+left:`${jogador.x}%`,
 
-top:`${j.y}%`,
+top:`${jogador.y}%`,
 
 transform:"translate(-50%,-50%)"
 
 }}
 
 >
+
 
 
 <div
@@ -340,7 +309,8 @@ border
 border-white
 
 ${
-j.status === "morto"
+
+jogador.status === "morto"
 
 ?
 
@@ -357,6 +327,7 @@ j.status === "morto"
 />
 
 
+
 <div
 
 className="
@@ -369,9 +340,10 @@ whitespace-nowrap
 
 >
 
-{j.nome}
+{jogador.nome}
 
 </div>
+
 
 
 </div>
@@ -379,11 +351,16 @@ whitespace-nowrap
 
 ))
 
+
 }
 
 
 
 
+
+
+
+{/* CENTRO DO RADAR */}
 
 
 
@@ -408,6 +385,8 @@ animate-ping
 
 
 
+
+
 <div
 
 className="
@@ -427,8 +406,11 @@ ORION • INDOOR TACTICAL MAP
 
 
 
+
+
 </div>
 
 );
+
 
 }

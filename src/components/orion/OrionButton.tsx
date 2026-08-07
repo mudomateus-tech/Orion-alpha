@@ -1,12 +1,15 @@
 "use client";
 
+
 interface OrionButtonProps {
 
   children: React.ReactNode;
 
   onClick?: () => void;
 
-  variant?: "normal" | "danger";
+  secondary?: boolean;
+
+  disabled?: boolean;
 
   className?: string;
 
@@ -20,11 +23,14 @@ export default function OrionButton({
 
   onClick,
 
-  variant = "normal",
+  secondary = false,
+
+  disabled = false,
 
   className = ""
 
 }: OrionButtonProps){
+
 
 
   return (
@@ -33,70 +39,49 @@ export default function OrionButton({
 
       onClick={onClick}
 
+      disabled={disabled}
+
       className={`
-
-        relative
-
-        overflow-hidden
-
+      
         w-full
+
+        p-4
 
         rounded-xl
 
-        px-5
-
-        py-3
-
-        font-bold
+        font-black
 
         tracking-widest
 
-        uppercase
-
-        transition-all
-
-        duration-300
+        transition
 
         border
 
-
         ${
-          variant === "danger"
+          secondary
 
           ?
 
-          `
-
-          border-red-500/60
-
-          text-red-400
-
-          shadow-[0_0_25px_rgba(255,0,0,0.35)]
-
-          hover:bg-red-500/10
-
-          `
+          "bg-black border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10"
 
           :
 
-          `
-
-          border-cyan-400/60
-
-          text-cyan-300
-
-          shadow-[0_0_25px_rgba(0,220,255,0.35)]
-
-          hover:bg-cyan-400/10
-
-          `
+          "bg-cyan-500 text-black hover:bg-cyan-400"
 
         }
 
+        ${
+          disabled
 
-        hover:scale-[1.02]
+          ?
 
-        active:scale-95
+          "opacity-50 cursor-not-allowed"
+
+          :
+
+          ""
+
+        }
 
         ${className}
 
@@ -104,53 +89,7 @@ export default function OrionButton({
 
     >
 
-
-      <span
-
-        className="
-
-          relative
-
-          z-10
-
-        "
-
-      >
-
-        {children}
-
-      </span>
-
-
-
-      <span
-
-        className="
-
-          absolute
-
-          inset-0
-
-          bg-gradient-to-r
-
-          from-transparent
-
-          via-white/10
-
-          to-transparent
-
-          translate-x-[-100%]
-
-          hover:translate-x-[100%]
-
-          transition-transform
-
-          duration-700
-
-        "
-
-      />
-
+      {children}
 
     </button>
 

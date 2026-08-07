@@ -1,250 +1,82 @@
 "use client";
 
-import {
-  useState
-} from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import {
-  useRouter
-} from "next/navigation";
-
-
-import OrionHUD from "@/components/orion/OrionHUD";
+import OrionHomeHUD from "@/components/orion/OrionHomeHUD";
 import OrionTitle from "@/components/orion/OrionTitle";
 import OrionPanel from "@/components/orion/OrionPanel";
 import OrionButton from "@/components/orion/OrionButton";
 import OrionAlert from "@/components/orion/OrionAlert";
 
+import { entrarPorCodigo } from "@/services/joinByCode";
 
-import {
-  entrarPorCodigo
-} from "@/services/joinByCode";
-
-
-
-
-export default function Entrar(){
-
+export default function Entrar() {
 
   const router = useRouter();
 
+  const [nome, setNome] = useState("");
+  const [codigo, setCodigo] = useState("");
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
 
+  async function entrar() {
 
-  const [
-
-    nome,
-
-    setNome
-
-  ] = useState("");
-
-
-
-
-  const [
-
-    codigo,
-
-    setCodigo
-
-  ] = useState("");
-
-
-
-
-  const [
-
-    carregando,
-
-    setCarregando
-
-  ] = useState(false);
-
-
-
-
-  const [
-
-    erro,
-
-    setErro
-
-  ] = useState("");
-
-
-
-
-
-
-
-
-  async function entrar(){
-
-
-    try{
-
+    try {
 
       setCarregando(true);
-
       setErro("");
 
-
-
-
-
-      if(
-
-        !nome.trim() ||
-
-        !codigo.trim()
-
-      ){
-
-        throw new Error(
-
-          "Preencha todos os campos."
-
-        );
-
+      if (!nome.trim() || !codigo.trim()) {
+        throw new Error("Preencha todos os campos.");
       }
 
+      let jogadorId = sessionStorage.getItem("agenteId");
 
-
-
-
-
-      let jogadorId =
-
-        sessionStorage.getItem(
-
-          "agenteId"
-
-        );
-
-
-
-
-
-
-      if(!jogadorId){
-
+      if (!jogadorId) {
 
         jogadorId =
-
           Date.now().toString() +
-
-          Math.random()
-
-          .toString(36)
-
-          .substring(2);
-
-
-
+          Math.random().toString(36).substring(2);
 
         sessionStorage.setItem(
-
           "agenteId",
-
           jogadorId
-
         );
-
 
       }
 
-
-
-
-
-
-
-
-      const resultado =
-
-        await entrarPorCodigo(
-
-          codigo.trim().toUpperCase(),
-
-          jogadorId,
-
-          nome.trim()
-
-        );
-
-
-
-
-
-
+      const resultado = await entrarPorCodigo(
+        codigo.trim().toUpperCase(),
+        jogadorId,
+        nome.trim()
+      );
 
       sessionStorage.setItem(
-
         "agenteId",
-
         resultado.jogadorId
-
       );
-
-
-
-
-
-
 
       router.push(
-
         `/lobby?id=${resultado.operacaoId}&codigo=${resultado.codigo}&jogador=${resultado.jogadorId}`
-
       );
 
-
-
-
-
-
-    }
-
-
-    catch(error:any){
-
+    } catch (error: any) {
 
       console.error(error);
+      setErro(error.message);
 
-
-      setErro(
-
-        error.message
-
-      );
-
-
-    }
-
-
-    finally{
-
+    } finally {
 
       setCarregando(false);
 
-
     }
 
-
   }
-
-
-
-
-
-
-
-
 
   return (
 
     <main
-
       className="
         min-h-screen
         bg-black
@@ -256,84 +88,38 @@ export default function Entrar(){
         relative
         overflow-hidden
       "
-
     >
 
-
-
-      <OrionHUD />
-
-
-
-
-
-
+      <OrionHomeHUD />
 
       <div
-
         className="
           relative
           z-10
           w-full
           max-w-md
         "
-
       >
-
-
 
         <OrionTitle />
 
-
-
-
-
-
-
         <OrionPanel>
 
-
           <h2
-
             className="
               text-center
               text-2xl
               font-bold
               mb-6
             "
-
           >
-
             AGENTE
-
           </h2>
 
-
-
-
-
-
-
           <input
-
             value={nome}
-
-            onChange={
-
-              e=>
-
-              setNome(
-
-                e.target.value
-
-              )
-
-            }
-
-
+            onChange={(e) => setNome(e.target.value)}
             placeholder="Seu nome"
-
-
             className="
               w-full
               bg-zinc-950
@@ -345,37 +131,16 @@ export default function Entrar(){
               outline-none
               text-white
             "
-
           />
 
-
-
-
-
-
-
-
-
           <input
-
             value={codigo}
-
-            onChange={
-
-              e=>
-
+            onChange={(e) =>
               setCodigo(
-
                 e.target.value.toUpperCase()
-
               )
-
             }
-
-
             placeholder="Código da operação"
-
-
             className="
               w-full
               bg-zinc-950
@@ -388,93 +153,32 @@ export default function Entrar(){
               outline-none
               text-white
             "
-
           />
 
-
-
-
-
-
-
-
           <OrionButton
-
             onClick={entrar}
-
             disabled={carregando}
-
           >
-
-
-            {
-
-              carregando
-
-              ?
-
-              "CONECTANDO..."
-
-              :
-
-              "ENTRAR NA OPERAÇÃO"
-
-            }
-
-
+            {carregando
+              ? "CONECTANDO..."
+              : "ENTRAR NA OPERAÇÃO"}
           </OrionButton>
 
-
-
-
-
-
-
-
-          {
-
-            erro &&
-
-
-            <div
-
-              className="mt-5"
-
-            >
-
+          {erro && (
+            <div className="mt-5">
               <OrionAlert
-
                 mensagem={erro}
-
                 tipo="erro"
-
               />
-
             </div>
-
-
-          }
-
-
-
-
-
-
+          )}
 
         </OrionPanel>
 
-
-
-
-
       </div>
-
-
-
 
     </main>
 
   );
-
 
 }
